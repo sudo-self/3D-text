@@ -33,7 +33,21 @@ function init() {
   animate();
 }
 
-// Handle user file upload
+// --- Slider updates ---
+const sliders = [
+  { id: "metalness", span: "metalValue" },
+  { id: "roughness", span: "roughValue" },
+  { id: "depth", span: "depthValue" }
+];
+sliders.forEach(s => {
+  const slider = document.getElementById(s.id);
+  const label = document.getElementById(s.span);
+  slider.addEventListener("input", () => {
+    label.textContent = slider.value;
+  });
+});
+
+// --- User file upload ---
 document.getElementById("textureInput")?.addEventListener("change", (event) => {
   const file = event.target.files[0];
   if (!file) return;
@@ -41,50 +55,76 @@ document.getElementById("textureInput")?.addEventListener("change", (event) => {
   const url = URL.createObjectURL(file);
   userTexture = textureLoader.load(url, () => {
     console.log("User texture loaded");
+    document.getElementById("texturePreview").src = url;
+    document.getElementById("texturePreview").classList.remove("hidden");
   });
 });
 
+// --- AI-generated texture ---
+document.getElementById("generateTextureBtn")?.addEventListener("click", async () => {
+  const prompt = document.getElementById("texturePrompt").value.trim();
+  if (!prompt) return alert("Please enter a prompt for the texture!");
+
+  const btn = document.getElementById("generateTextureBtn");
+  btn.disabled = true;
+  btn.textContent = "Generating...";
+
+  try {
+    const response = await fetch(`https://text-to-image.jessejesse.workers.dev/?prompt=${encodeURIComponent(prompt)}`);
+    if (!response.ok) throw new Error("Failed to generate texture");
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+
+    userTexture = textureLoader.load(url, () => console.log("AI texture loaded"));
+    const preview = document.getElementById("generatedTexturePreview");
+    preview.src = url;
+    preview.classList.remove("hidden");
+
+  } catch (err) {
+    console.error(err);
+    alert("Texture generation failed");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Generate";
+  }
+});
+
+// --- Create 3D text ---
 function createText(text, color, fontName, depth, metalness = 0.5, roughness = 0.5) {
-  loader.load(
-    `https://threejs.org/examples/fonts/${fontName}_regular.typeface.json`,
-    function (font) {
-      const geometry = new THREE.TextGeometry(text, {
-        font: font,
-        size: 1,
-        height: depth,
-        curveSegments: 12,
-        bevelEnabled: true,
-        bevelThickness: 0.05,
-        bevelSize: 0.05,
-        bevelSegments: 3
-      });
+  loader.load(`https://threejs.org/examples/fonts/${fontName}_regular.typeface.json`, (font) => {
+    const geometry = new THREE.TextGeometry(text, {
+      font,
+      size: 1,
+      height: depth,
+      curveSegments: 12,
+      bevelEnabled: true,
+      bevelThickness: 0.05,
+      bevelSize: 0.05,
+      bevelSegments: 3
+    });
 
-      geometry.computeBoundingBox();
-      geometry.center();
+    geometry.computeBoundingBox();
+    geometry.center();
 
-      let material;
-
-      if (userTexture) {
-        material = new THREE.MeshStandardMaterial({ map: userTexture });
-      } else {
-        material = new THREE.MeshStandardMaterial({
-          color,
-          metalness,
-          roughness
-        });
-      }
-
-      const mesh = new THREE.Mesh(geometry, material);
-
-      if (textMesh) scene.remove(textMesh);
-      textMesh = mesh;
-      scene.add(mesh);
-
-      fitCameraToObject(mesh, camera, controls);
+    let material;
+    if (userTexture) {
+      material = new THREE.MeshStandardMaterial({ map: userTexture, metalness, roughness });
+    } else {
+      material = new THREE.MeshStandardMaterial({ color, metalness, roughness });
     }
-  );
+
+    const mesh = new THREE.Mesh(geometry, material);
+
+    if (textMesh) scene.remove(textMesh);
+    textMesh = mesh;
+    scene.add(mesh);
+
+    fitCameraToObject(mesh, camera, controls);
+  });
 }
 
+// --- Camera fit ---
 function fitCameraToObject(object, camera, controls) {
   const box = new THREE.Box3().setFromObject(object);
   const size = box.getSize(new THREE.Vector3());
@@ -94,21 +134,22 @@ function fitCameraToObject(object, camera, controls) {
 
   const maxDim = Math.max(size.x, size.y, size.z);
   const fov = camera.fov * (Math.PI / 180);
-  let cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2)));
-  cameraZ *= 1.5;
+  let cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2))) * 1.5;
 
   camera.position.set(0, 0, cameraZ);
   camera.lookAt(0, 0, 0);
   controls.update();
 }
 
+// --- Animate ---
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
   renderer.render(scene, camera);
 }
 
-document.getElementById("generateBtn").addEventListener("click", () => {
+// --- Generate button ---
+document.getElementById("generateBtn")?.addEventListener("click", () => {
   const text = document.getElementById("textInput").value;
   const color = document.getElementById("textColor").value;
   const font = document.getElementById("fontStyle").value;
@@ -124,14 +165,14 @@ document.getElementById("generateBtn").addEventListener("click", () => {
   }, 500);
 });
 
-document.getElementById("downloadBtn").addEventListener("click", () => {
+// --- Download button ---
+document.getElementById("downloadBtn")?.addEventListener("click", () => {
   if (!textMesh) return;
 
   exporter.parse(
     textMesh,
     (result) => {
       let blob;
-
       if (result instanceof ArrayBuffer) {
         blob = new Blob([result], { type: "model/gltf-binary" });
       } else {
@@ -146,4 +187,5 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
     { binary: true }
   );
 });
+
 
