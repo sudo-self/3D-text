@@ -97,13 +97,18 @@ document.getElementById("generateBtn").addEventListener("click", () => {
   const font = document.getElementById("fontStyle").value;
   const depth = parseFloat(document.getElementById("depth").value);
 
+
+  const metalness = parseFloat(document.getElementById("metalness")?.value) || 0.5;
+  const roughness = parseFloat(document.getElementById("roughness")?.value) || 0.5;
+
   document.getElementById("loading").classList.remove("hidden");
   setTimeout(() => {
-    createText(text, color, font, depth);
+    createText(text, color, font, depth, metalness, roughness);
     document.getElementById("loading").classList.add("hidden");
     document.getElementById("downloadBtn").disabled = false;
   }, 500);
 });
+
 
 document.getElementById("downloadBtn").addEventListener("click", () => {
   if (!textMesh) return;
