@@ -82,21 +82,22 @@ document.addEventListener("DOMContentLoaded", () => {
           ? new THREE.MeshStandardMaterial({ map: userTexture, metalness, roughness })
           : new THREE.MeshStandardMaterial({ color, metalness, roughness });
 
-        if (textMesh) scene.remove(textMesh);
+        if (textMesh) {
+          scene.remove(textMesh);
+          textMesh.geometry.dispose();
+          textMesh.material.dispose();
+        }
+
         textMesh = new THREE.Mesh(geometry, material);
         scene.add(textMesh);
         fitCameraToObject(textMesh);
-
-        // Ensure sliders always update the current material
-        metalSlider.dispatchEvent(new Event("input"));
-        roughSlider.dispatchEvent(new Event("input"));
-        depthSlider.dispatchEvent(new Event("input"));
       },
       undefined,
       err => console.error(err)
     );
   }
 
+  // Sliders
   const metalSlider = document.getElementById("metalness");
   const roughSlider = document.getElementById("roughness");
   const depthSlider = document.getElementById("depth");
@@ -123,19 +124,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const value = parseFloat(e.target.value);
     document.getElementById("depthValue").textContent = value.toFixed(2);
     if (textMesh && textMesh.geometry) {
-      const geom = new THREE.TextGeometry(
-        textMesh.geometry.parameters.text,
-        {
-          font: textMesh.geometry.parameters.font,
-          size: 1,
-          height: value,
-          curveSegments: 12,
-          bevelEnabled: true,
-          bevelThickness: 0.05,
-          bevelSize: 0.05,
-          bevelSegments: 3
-        }
-      );
+      const params = textMesh.geometry.parameters;
+      const geom = new THREE.TextGeometry(params.text, {
+        font: params.font,
+        size: 1,
+        height: value,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 0.05,
+        bevelSize: 0.05,
+        bevelSegments: 3
+      });
       geom.center();
       textMesh.geometry.dispose();
       textMesh.geometry = geom;
@@ -143,6 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Texture upload
   const textureInput = document.getElementById("textureInput");
   const texturePreview = document.getElementById("texturePreview");
   textureInput.addEventListener("change", e => {
@@ -154,6 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
     texturePreview.classList.remove("hidden");
   });
 
+  // AI Texture Generation
   const generateTextureBtn = document.getElementById("generateTextureBtn");
   generateTextureBtn.addEventListener("click", async () => {
     const prompt = document.getElementById("texturePrompt").value.trim();
@@ -178,6 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Generate 3D Text
   const generateBtn = document.getElementById("generateBtn");
   generateBtn.addEventListener("click", () => {
     const text = document.getElementById("textInput").value;
@@ -195,36 +197,37 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 100);
   });
 
- const downloadBtn = document.getElementById("downloadBtn");
-downloadBtn.addEventListener("click", () => {
-  if (!textMesh) return;
 
-  exporter.parse(
-    textMesh,
-    result => {
-      if (result.asset) {
+  const downloadBtn = document.getElementById("downloadBtn");
+  downloadBtn.addEventListener("click", () => {
+    if (!textMesh) return;
+
+    exporter.parse(
+      textMesh,
+      result => {
+        if (!result.asset) result.asset = {};
         result.asset.extras = { website: "jessejesse.com" };
-      } else {
-        result.asset = { extras: { website: "jessejesse.com" } };
-      }
 
-      const blob =
-        result instanceof ArrayBuffer
-          ? new Blob([result], { type: "model/gltf-binary" })
-          : new Blob([JSON.stringify(result, null, 2)], { type: "model/gltf+json" });
+        const blob =
+          result instanceof ArrayBuffer
+            ? new Blob([result], { type: "model/gltf-binary" })
+            : new Blob([JSON.stringify(result, null, 2)], { type: "model/gltf+json" });
 
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "3d-text.glb";
-      link.click();
-    },
-    { binary: true }
-  );
-});
-
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "3d-text.glb";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      },
+      { binary: true }
+    );
+  });
 
   init();
 });
+
 
 
 
