@@ -195,24 +195,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 100);
   });
 
-  const downloadBtn = document.getElementById("downloadBtn");
-  downloadBtn.addEventListener("click", () => {
-    if (!textMesh) return;
-    exporter.parse(
-      textMesh,
-      result => {
-        const blob =
-          result instanceof ArrayBuffer
-            ? new Blob([result], { type: "model/gltf-binary" })
-            : new Blob([JSON.stringify(result, null, 2)], { type: "model/gltf+json" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "3d-text.glb";
-        link.click();
-      },
-      { binary: true }
-    );
-  });
+ const downloadBtn = document.getElementById("downloadBtn");
+downloadBtn.addEventListener("click", () => {
+  if (!textMesh) return;
+
+  exporter.parse(
+    textMesh,
+    result => {
+      if (result.asset) {
+        result.asset.extras = { website: "jessejesse.com" };
+      } else {
+        result.asset = { extras: { website: "jessejesse.com" } };
+      }
+
+      const blob =
+        result instanceof ArrayBuffer
+          ? new Blob([result], { type: "model/gltf-binary" })
+          : new Blob([JSON.stringify(result, null, 2)], { type: "model/gltf+json" });
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "3d-text.glb";
+      link.click();
+    },
+    { binary: true }
+  );
+});
+
 
   init();
 });
