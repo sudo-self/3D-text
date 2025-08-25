@@ -1,152 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Text to 3D Model Generator</title>
-<link rel="icon" href="/favicon.ico">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<meta name="author" content="sudo-self">
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-@keyframes gradient-x {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-.animate-gradient-x { background-size: 200% 200%; animation: gradient-x 4s ease infinite; }
-.text-glow { text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.2); }
-</style>
-<script async defer src="https://buttons.github.io/buttons.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Text to 3D Model Generator</title>
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <meta name="author" content="sudo-self" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes gradient-x {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .animate-gradient-x { background-size: 200% 200%; animation: gradient-x 4s ease infinite; }
+    .text-glow { text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.2); }
+  </style>
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
 </head>
 
 <body class="bg-gradient-to-br from-black via-gray-500 to-gray-900 min-h-screen flex flex-col items-center justify-start py-10 text-gray-800">
 
-<div class="w-full max-w-5xl px-4">
+  <div class="w-full max-w-5xl px-4">
 
- <header class="text-center mb-10">
-  <h1 class="text-7xl font-extrabold mb-4 bg-gradient-to-r from-indigo-300 via-pink-300 to-yellow-300 bg-clip-text text-transparent animate-gradient-x text-glow">
-    Text to GLB
-  </h1>
+    <header class="text-center mb-10">
+      <h1 class="text-7xl font-extrabold mb-4 bg-gradient-to-r from-indigo-300 via-pink-300 to-yellow-300 bg-clip-text text-transparent animate-gradient-x text-glow">
+        Text to GLB
+      </h1>
+      <div class="flex justify-center gap-4 mb-4">
+        <a class="github-button" href="https://github.com/sudo-self/3D-text" data-color-scheme="no-preference: light_high_contrast; light: light_high_contrast; dark: light;" data-icon="octicon-star" data-size="large" aria-label="Star sudo-self/3D-text on GitHub">Star</a>
+        <a class="github-button" href="https://github.com/sudo-self/3D-text/fork" data-color-scheme="no-preference: light_high_contrast; light: light_high_contrast; dark: light;" data-icon="octicon-repo-forked" data-size="large" aria-label="Fork sudo-self/3D-text on GitHub">Fork</a>
+      </div>
+      <p class="text-lg text-cyan-500 hover:text-white">
+        <a href="https://text.JesseJesse.com">JesseJesse.com</a>
+      </p>
+    </header>
 
+    <section class="bg-white rounded-3xl shadow-2xl p-8 mb-10">
+      <div class="grid gap-6">
 
-  <div class="flex justify-center gap-4 mb-4">
-    <a class="github-button" href="https://github.com/sudo-self/3D-text" 
-       data-color-scheme="no-preference: light_high_contrast; light: light_high_contrast; dark: light;" 
-       data-icon="octicon-star" data-size="large" 
-       aria-label="Star sudo-self/3D-text on GitHub">Star</a>
+        <div>
+          <label for="textInput" class="block mb-2 font-semibold text-gray-700">Enter Text</label>
+          <input type="text" id="textInput" value="3D-Text" placeholder="Type your text here..." class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+        </div>
 
-    <a class="github-button" href="https://github.com/sudo-self/3D-text/fork" 
-       data-color-scheme="no-preference: light_high_contrast; light: light_high_contrast; dark: light;" 
-       data-icon="octicon-repo-forked" data-size="large" 
-       aria-label="Fork sudo-self/3D-text on GitHub">Fork</a>
+        <div>
+          <label for="textColor" class="block mb-2 font-semibold text-gray-700">Text Color</label>
+          <input type="color" id="textColor" value="#667eea" class="w-20 h-10 p-0 border-0 rounded-lg cursor-pointer">
+        </div>
+
+        <div>
+          <label for="textureInput" class="block mb-2 font-semibold text-gray-700">Texture Upload (optional)</label>
+          <input type="file" id="textureInput" accept="image/*" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg">
+          <img id="texturePreview" class="mt-2 w-24 h-24 object-cover rounded border border-gray-300 hidden">
+        </div>
+
+        <div>
+          <label for="texturePrompt" class="block mb-2 font-semibold text-gray-700">Texture Prompt (via Worker)</label>
+          <input type="text" id="texturePrompt" placeholder="e.g. metallic rainbow, marble, sci-fi" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg">
+          <button id="generateTextureBtn" class="relative inline-flex items-center justify-center p-0.5 mt-2 text-sm font-medium rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 hover:text-white focus:ring-4 focus:ring-blue-300">
+            <span class="relative px-5 py-2.5 bg-white rounded-md group-hover:bg-transparent">Generate Texture</span>
+          </button>
+        </div>
+
+        <div>
+          <label for="fontStyle" class="block mb-2 font-semibold text-gray-700">Font Style</label>
+          <select id="fontStyle" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg">
+            <option value="helvetiker">Helvetiker</option>
+            <option value="optimer">Optimer</option>
+            <option value="gentilis">Gentilis</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label for="depth" class="block mb-2 font-semibold text-gray-700">Depth</label>
+            <input type="range" id="depth" min="0.1" max="5" step="0.1" value="1" class="w-full">
+            <span id="depthValue" class="text-sm text-gray-600">1</span>
+          </div>
+          <div>
+            <label for="bevel" class="block mb-2 font-semibold text-gray-700">Bevel</label>
+            <input type="range" id="bevel" min="0" max="1" step="0.1" value="0.2" class="w-full">
+            <span id="bevelValue" class="text-sm text-gray-600">0.2</span>
+          </div>
+          <div>
+            <label for="curve" class="block mb-2 font-semibold text-gray-700">Curve</label>
+            <input type="range" id="curve" min="1" max="20" step="1" value="12" class="w-full">
+            <span id="curveValue" class="text-sm text-gray-600">12</span>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-4">
+          <button id="downloadBtn" class="px-6 py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white font-semibold rounded-xl shadow-lg hover:from-green-500 hover:to-blue-600 transition">Download GLB</button>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="bg-white rounded-3xl shadow-2xl p-8">
+      <div id="viewer" class="w-full h-[500px] rounded-xl"></div>
+    </section>
+
   </div>
 
-  <p class="text-lg text-cyan-500 hover:text-white">
-   &nbsp;<a href="https://text.JesseJesse.com">JesseJesse.com</a>
-  </p>
-</header>
-
-
-  <section class="bg-white rounded-3xl shadow-2xl p-8 mb-10">
-    <div class="grid gap-6">
-
-
-      <div>
-        <label for="textInput" class="block mb-2 font-semibold text-gray-700">Enter Text</label>
-        <input type="text" id="textInput" value="3D-Text" placeholder="Type your text here..." class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
-      </div>
-
-   
-      <div>
-        <label for="textColor" class="block mb-2 font-semibold text-gray-700">Text Color</label>
-        <input type="color" id="textColor" value="#667eea" class="w-20 h-10 p-0 border-0 rounded-lg cursor-pointer">
-      </div>
-
-    
-      <div>
-        <label for="textureInput" class="block mb-2 font-semibold text-gray-700">Texture Upload (optional)</label>
-        <input type="file" id="textureInput" accept="image/*" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
-        <img id="texturePreview" class="mt-2 w-24 h-24 object-cover rounded border border-gray-300 hidden">
-      </div>
-
-   
-      <div>
-        <label for="texturePrompt" class="block mb-2 font-semibold text-gray-700">Texture Prompt (optional)</label>
-        <input type="text" id="texturePrompt" placeholder="metallic rainbow, marble, sci-fi" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
-        <button id="generateTextureBtn" class="relative inline-flex items-center justify-center p-0.5 mt-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group 
-        bg-gradient-to-br from-purple-600 to-blue-500 
-        hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-300">
-          <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent">
-            Generate Texture
-          </span>
-        </button>
-      </div>
-
-    
-      <div>
-        <label for="fontStyle" class="block mb-2 font-semibold text-gray-700">Font Style</label>
-        <select id="fontStyle" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
-          <option value="helvetiker">Helvetiker</option>
-          <option value="optimer">Optimer</option>
-          <option value="gentilis">Gentilis</option>
-          <option value="droid_sans">Droid Sans</option>
-        </select>
-      </div>
-
-
-      <div>
-        <label for="metalness" class="block mb-2 font-semibold text-gray-700">Metalness <span id="metalValue">0.50</span></label>
-        <input type="range" id="metalness" min="0" max="1" step="0.01" value="0.5" class="w-full h-2 bg-gray-300 rounded-lg">
-      </div>
-
-      <div>
-        <label for="roughness" class="block mb-2 font-semibold text-gray-700">Roughness <span id="roughValue">0.50</span></label>
-        <input type="range" id="roughness" min="0" max="1" step="0.01" value="0.5" class="w-full h-2 bg-gray-300 rounded-lg">
-      </div>
-
-      <div>
-        <label for="depth" class="block mb-2 font-semibold text-gray-700">Depth <span id="depthValue">0.50</span></label>
-        <input type="range" id="depth" min="0.1" max="2" step="0.1" value="0.5" class="w-full h-2 bg-gray-300 rounded-lg cursor-pointer">
-      </div>
-
- 
-      <button id="generateBtn" class="relative inline-flex items-center justify-center p-0.5 mt-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group 
-      bg-gradient-to-br from-cyan-500 to-blue-500 
-      hover:text-white focus:outline-none focus:ring-4 focus:ring-cyan-200 w-full">
-        <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent">
-          Create 3D Text
-        </span>
-      </button>
-
-    </div>
-  </section>
-
-  <div id="loading" class="text-white text-center text-lg mb-6 hidden">Generating 3D model...</div>
-
-  <section class="bg-white rounded-2xl shadow-2xl overflow-hidden mb-10 w-full h-[400px]">
-    <div id="renderCanvas" class="w-full h-full"></div>
-  </section>
-
-  <div class="text-center">
-    <button id="downloadBtn" class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group
-    bg-gradient-to-br from-green-400 to-blue-600 
-    hover:text-white focus:outline-none focus:ring-4 focus:ring-green-200" disabled>
-      <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent">
-        Download
-      </span>
-    </button>
-  </div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/FontLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/exporters/GLTFExporter.js"></script>
-<script src="app.js"></script>
+  <!-- three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/exporters/GLTFExporter.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
