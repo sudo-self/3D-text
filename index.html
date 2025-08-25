@@ -16,14 +16,6 @@
 }
 .animate-gradient-x { background-size: 200% 200%; animation: gradient-x 4s ease infinite; }
 .text-glow { text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.2); }
-
-
-.btn-gradient {
-  @apply relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group hover:text-white focus:outline-none focus:ring-4;
-}
-.btn-gradient span {
-  @apply relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent;
-}
 </style>
 </head>
 
@@ -43,35 +35,39 @@
   <section class="bg-white rounded-3xl shadow-2xl p-8 mb-10">
     <div class="grid gap-6">
 
-
+      <!-- Text Input -->
       <div>
         <label for="textInput" class="block mb-2 font-semibold text-gray-700">Enter Text</label>
         <input type="text" id="textInput" value="text-to-glb" placeholder="Type your text here..." class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
       </div>
 
-
+      <!-- Text Color -->
       <div>
         <label for="textColor" class="block mb-2 font-semibold text-gray-700">Text Color</label>
         <input type="color" id="textColor" value="#667eea" class="w-20 h-10 p-0 border-0 rounded-lg cursor-pointer">
       </div>
 
- 
+      <!-- Texture Upload -->
       <div>
         <label for="textureInput" class="block mb-2 font-semibold text-gray-700">Texture Upload</label>
         <input type="file" id="textureInput" accept="image/*" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
         <img id="texturePreview" class="mt-2 w-24 h-24 object-cover rounded border border-gray-300 hidden">
       </div>
 
-  
+      <!-- Texture Prompt -->
       <div>
         <label for="texturePrompt" class="block mb-2 font-semibold text-gray-700">Texture Prompt (optional)</label>
         <input type="text" id="texturePrompt" placeholder="e.g., metallic rainbow, marble, sci-fi" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
-        <button id="generateTextureBtn" class="btn-gradient bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 focus:ring-blue-300">
-          <span>Generate Texture</span>
+        <button id="generateTextureBtn" class="relative inline-flex items-center justify-center p-0.5 mt-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group 
+        bg-gradient-to-br from-purple-600 to-blue-500 
+        hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-300">
+          <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent">
+            Generate Texture
+          </span>
         </button>
       </div>
 
-
+      <!-- Font Style -->
       <div>
         <label for="fontStyle" class="block mb-2 font-semibold text-gray-700">Font Style</label>
         <select id="fontStyle" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
@@ -82,7 +78,7 @@
         </select>
       </div>
 
- 
+      <!-- Sliders -->
       <div>
         <label for="metalness" class="block mb-2 font-semibold text-gray-700">Metalness <span id="metalValue">0.50</span></label>
         <input type="range" id="metalness" min="0" max="1" step="0.01" value="0.5" class="w-full h-2 bg-gray-300 rounded-lg">
@@ -98,9 +94,13 @@
         <input type="range" id="depth" min="0.1" max="2" step="0.1" value="0.5" class="w-full h-2 bg-gray-300 rounded-lg cursor-pointer">
       </div>
 
- 
-      <button id="generateBtn" class="btn-gradient bg-gradient-to-br from-cyan-500 to-blue-500 group-hover:from-cyan-500 group-hover:to-blue-500 focus:ring-cyan-200 w-full">
-        <span>Create 3D Text</span>
+      <!-- Generate Button -->
+      <button id="generateBtn" class="relative inline-flex items-center justify-center p-0.5 mt-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group 
+      bg-gradient-to-br from-cyan-500 to-blue-500 
+      hover:text-white focus:outline-none focus:ring-4 focus:ring-cyan-200 w-full">
+        <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent">
+          Create 3D Text
+        </span>
       </button>
 
     </div>
@@ -113,8 +113,12 @@
   </section>
 
   <div class="text-center">
-    <button id="downloadBtn" class="btn-gradient bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 focus:ring-green-200" disabled>
-      <span>Download</span>
+    <button id="downloadBtn" class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group
+    bg-gradient-to-br from-green-400 to-blue-600 
+    hover:text-white focus:outline-none focus:ring-4 focus:ring-green-200" disabled>
+      <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent">
+        Download
+      </span>
     </button>
   </div>
 
@@ -127,6 +131,7 @@
 <script src="app.js"></script>
 </body>
 </html>
+
 
 
 
