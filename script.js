@@ -31,7 +31,7 @@ function init() {
   animate();
 }
 
-function createText(text, color, fontName, depth) {
+function createText(text, color, fontName, depth, metalness = 0.5, roughness = 0.5) {
   loader.load(
     `https://threejs.org/examples/fonts/${fontName}_regular.typeface.json`,
     function (font) {
@@ -49,7 +49,13 @@ function createText(text, color, fontName, depth) {
       geometry.computeBoundingBox();
       geometry.center();
 
-      const material = new THREE.MeshStandardMaterial({ color });
+   
+      const material = new THREE.MeshStandardMaterial({
+        color: color,
+        metalness: metalness,
+        roughness: roughness
+      });
+
       const mesh = new THREE.Mesh(geometry, material);
 
       if (textMesh) scene.remove(textMesh);
@@ -60,6 +66,7 @@ function createText(text, color, fontName, depth) {
     }
   );
 }
+
 
 function fitCameraToObject(object, camera, controls) {
   const box = new THREE.Box3().setFromObject(object);
