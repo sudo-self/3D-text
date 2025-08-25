@@ -1,6 +1,8 @@
 let scene, camera, renderer, controls, textMesh;
 const loader = new THREE.FontLoader();
 const exporter = new THREE.GLTFExporter();
+const textureLoader = new THREE.TextureLoader();
+let userTexture = null;
 
 init();
 
@@ -31,6 +33,17 @@ function init() {
   animate();
 }
 
+// Handle user file upload
+document.getElementById("textureInput")?.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const url = URL.createObjectURL(file);
+  userTexture = textureLoader.load(url, () => {
+    console.log("User texture loaded");
+  });
+});
+
 function createText(text, color, fontName, depth, metalness = 0.5, roughness = 0.5) {
   loader.load(
     `https://threejs.org/examples/fonts/${fontName}_regular.typeface.json`,
@@ -49,11 +62,17 @@ function createText(text, color, fontName, depth, metalness = 0.5, roughness = 0
       geometry.computeBoundingBox();
       geometry.center();
 
-      const material = new THREE.MeshStandardMaterial({
-        color,
-        metalness,
-        roughness
-      });
+      let material;
+
+      if (userTexture) {
+        material = new THREE.MeshStandardMaterial({ map: userTexture });
+      } else {
+        material = new THREE.MeshStandardMaterial({
+          color,
+          metalness,
+          roughness
+        });
+      }
 
       const mesh = new THREE.Mesh(geometry, material);
 
@@ -89,27 +108,13 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-// Slider visual updates
-const metalSlider = document.getElementById("metalness");
-const roughSlider = document.getElementById("roughness");
-
-metalSlider.addEventListener("input", (e) => {
-  document.getElementById("metalValue").textContent = e.target.value;
-});
-
-roughSlider.addEventListener("input", (e) => {
-  document.getElementById("roughValue").textContent = e.target.value;
-});
-
-// Generate button
 document.getElementById("generateBtn").addEventListener("click", () => {
   const text = document.getElementById("textInput").value;
   const color = document.getElementById("textColor").value;
   const font = document.getElementById("fontStyle").value;
   const depth = parseFloat(document.getElementById("depth").value);
-
-  const metalness = parseFloat(metalSlider.value) || 0.5;
-  const roughness = parseFloat(roughSlider.value) || 0.5;
+  const metalness = parseFloat(document.getElementById("metalness")?.value) || 0.5;
+  const roughness = parseFloat(document.getElementById("roughness")?.value) || 0.5;
 
   document.getElementById("loading").classList.remove("hidden");
   setTimeout(() => {
@@ -119,7 +124,6 @@ document.getElementById("generateBtn").addEventListener("click", () => {
   }, 500);
 });
 
-// Download button
 document.getElementById("downloadBtn").addEventListener("click", () => {
   if (!textMesh) return;
 
