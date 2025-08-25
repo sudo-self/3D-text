@@ -38,13 +38,11 @@
     <section class="bg-white rounded-2xl shadow-2xl p-8 mb-10">
       <div class="grid gap-6">
 
-        <!-- Text Input -->
         <div>
           <label for="textInput" class="block mb-2 font-semibold text-gray-700">Enter Text</label>
           <input type="text" id="textInput" value="vercel.app" placeholder="Type your text here..." class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
         </div>
 
-        <!-- Text Color -->
         <div>
           <label for="textColor" class="block mb-2 font-semibold text-gray-700">Text Color</label>
           <input type="color" id="textColor" value="#667eea" class="w-20 h-10 p-0 border-0 rounded-lg cursor-pointer">
@@ -54,9 +52,9 @@
         <div>
           <label for="textureInput" class="block mb-2 font-semibold text-gray-700">Optional Texture</label>
           <input type="file" id="textureInput" accept="image/*" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+          <img id="texturePreview" class="mt-2 w-20 h-20 object-cover rounded border border-gray-300 hidden">
         </div>
 
-        <!-- Font Style -->
         <div>
           <label for="fontStyle" class="block mb-2 font-semibold text-gray-700">Font Style</label>
           <select id="fontStyle" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
@@ -116,12 +114,43 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/FontLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/exporters/GLTFExporter.js"></script>
 
-  <!-- App Scripts -->
+
   <script src="app.js"></script>
   <script src="./script.js"></script>
 
+  <script>
+
+    const sliders = [
+      {id:'metalness', span:'metalValue'},
+      {id:'roughness', span:'roughValue'},
+      {id:'depth', span:'depthValue'}
+    ];
+    sliders.forEach(s => {
+      const slider = document.getElementById(s.id);
+      const label = document.getElementById(s.span);
+      slider.addEventListener('input', () => {
+        label.textContent = slider.value;
+      });
+    });
+
+
+    const textureInput = document.getElementById('textureInput');
+    const texturePreview = document.getElementById('texturePreview');
+    textureInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        texturePreview.src = event.target.result;
+        texturePreview.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+
 </body>
 </html>
+
 
 
 
