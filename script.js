@@ -4,7 +4,6 @@ const exporter = new THREE.GLTFExporter();
 const textureLoader = new THREE.TextureLoader();
 let userTexture = null;
 
-
 function init() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xffffff);
@@ -23,24 +22,32 @@ function init() {
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(ambientLight);
 
     const dirLight = new THREE.DirectionalLight(0xffffff, 1);
     dirLight.position.set(5, 10, 7.5);
     scene.add(dirLight);
 
+    window.addEventListener('resize', onWindowResize);
     animate();
 }
-init();
 
+function onWindowResize() {
+    const canvasContainer = document.getElementById("renderCanvas");
+    const width = canvasContainer.clientWidth;
+    const height = canvasContainer.clientHeight;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+}
 
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
 }
-
 
 function fitCameraToObject(object) {
     const box = new THREE.Box3().setFromObject(object);
@@ -53,20 +60,15 @@ function fitCameraToObject(object) {
     const fov = camera.fov * (Math.PI / 180);
     let cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2))) * 1.5;
 
-    camera.position.set(0, 0, cameraZ);
+    camera.position.set(0, maxDim * 0.6, cameraZ); 
     camera.lookAt(0, 0, 0);
     controls.update();
 }
 
 
-const sliders = [
-    { id: "metalness", span: "metalValue" },
-    { id: "roughness", span: "roughValue" },
-    { id: "depth", span: "depthValue" }
-];
-sliders.forEach(s => {
-    const slider = document.getElementById(s.id);
-    const label = document.getElementById(s.span);
+["metalness", "roughness", "depth"].forEach(id => {
+    const slider = document.getElementById(id);
+    const label = document.getElementById(id + "Value");
     slider.addEventListener("input", () => label.textContent = parseFloat(slider.value).toFixed(2));
 });
 
@@ -106,12 +108,12 @@ document.getElementById("generateTextureBtn").addEventListener("click", async ()
         alert("Texture generation failed");
     } finally {
         btn.disabled = false;
-        btn.textContent = "Generate Texture from Prompt";
+        btn.textContent = "Generate Texture";
     }
 });
 
 
-function createText(text, color, fontName, depth, metalness=0.5, roughness=0.5) {
+function createText(text, color, fontName, depth, metalness = 0.5, roughness = 0.5) {
     const fontUrl = `https://cdn.jsdelivr.net/npm/three@0.132.2/examples/fonts/${fontName}_regular.typeface.json`;
     loader.load(fontUrl, font => {
         const geometry = new THREE.TextGeometry(text, {
@@ -169,6 +171,9 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
         link.click();
     }, { binary: true });
 });
+
+init();
+
 
 
 
