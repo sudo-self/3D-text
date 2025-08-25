@@ -1,170 +1,144 @@
 let scene, camera, renderer, controls, textMesh;
-const loader = new THREE.FontLoader();
-const exporter = new THREE.GLTFExporter();
-const textureLoader = new THREE.TextureLoader();
+let fontLoader, textureLoader;
 let userTexture = null;
 
 function init() {
-  const canvasContainer = document.getElementById("renderCanvas");
-  const width = canvasContainer.clientWidth;
-  const height = canvasContainer.clientHeight;
-
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xffffff);
+  scene.background = new THREE.Color(0xf0f0f0);
 
-  camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-  camera.position.set(0, 2, 6);
+  camera = new THREE.PerspectiveCamera(45, viewer.clientWidth / viewer.clientHeight, 0.1, 1000);
+  camera.position.set(0, 2, 8);
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(width, height);
-  canvasContainer.appendChild(renderer.domElement);
+  renderer.setSize(viewer.clientWidth, viewer.clientHeight);
+  document.getElementById("viewer").appendChild(renderer.domElement);
 
   controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
 
-  // Lighting
-  const ambient = new THREE.AmbientLight(0xffffff, 0.8);
-  scene.add(ambient);
-  const dir = new THREE.DirectionalLight(0xffffff, 1);
-  dir.position.set(5, 10, 5);
-  scene.add(dir);
+  const light1 = new THREE.DirectionalLight(0xffffff, 1);
+  light1.position.set(5, 10, 7.5);
+  scene.add(light1);
+  scene.add(new THREE.AmbientLight(0x888888));
 
-  window.addEventListener("resize", onWindowResize);
+  fontLoader = new THREE.FontLoader();
+  textureLoader = new THREE.TextureLoader();
+
+  updateText();
+
   animate();
-}
-
-function onWindowResize() {
-  const canvasContainer = document.getElementById("renderCanvas");
-  camera.aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
 }
 
 function animate() {
   requestAnimationFrame(animate);
-  controls.update();
   renderer.render(scene, camera);
 }
 
-function fitCameraToObject(object) {
-  const box = new THREE.Box3().setFromObject(object);
-  const size = box.getSize(new THREE.Vector3());
-  const center = box.getCenter(new THREE.Vector3());
+// Update 3D Text
+function updateText() {
+  const text = document.getElementById("textInput").value;
+  const color = document.getElementById("textColor").value;
+  const depth = parseFloat(document.getElementById("depth").value);
+  const bevel = parseFloat(document.getElementById("bevel").value);
+  const curve = parseInt(document.getElementById("curve").value);
+  const fontStyle = document.getElementById("fontStyle").value;
 
-  object.position.sub(center);
+  fontLoader.load(`https://threejs.org/examples/fonts/${fontStyle}_regular.typeface.json`, font => {
+    if (textMesh) {
+      scene.remove(textMesh);
+      textMesh.geometry.dispose();
+    }
 
-  const maxDim = Math.max(size.x, size.y, size.z);
-  const fov = camera.fov * (Math.PI / 180);
-  const cameraZ = maxDim / (2 * Math.tan(fov / 2)) * 1.5;
+    const geometry = new THREE.TextGeometry(text, {
+      font: font,
+      size: 1,
+      height: depth,
+      curveSegments: curve,
+      bevelEnabled: bevel > 0,
+      bevelThickness: bevel,
+      bevelSize: bevel * 0.2,
+    });
 
-  camera.position.set(0, maxDim * 0.5, cameraZ);
-  camera.lookAt(0, 0, 0);
-  controls.update();
+    geometry.center();
+
+    const material = new THREE.MeshStandardMaterial({
+      color: color,
+      map: userTexture || null,
+    });
+
+    textMesh = new THREE.Mesh(geometry, material);
+    scene.add(textMesh);
+  });
 }
 
-// Sliders
-["metalness", "roughness", "depth"].forEach(id => {
-  const slider = document.getElementById(id);
-  const label = document.getElementById(id + "Value");
-  slider.addEventListener("input", () => (label.textContent = parseFloat(slider.value).toFixed(2)));
-});
-
-// Texture input
+// File Upload
 document.getElementById("textureInput").addEventListener("change", e => {
   const file = e.target.files[0];
   if (!file) return;
-  const url = URL.createObjectURL(file);
-  userTexture = textureLoader.load(url);
-  const preview = document.getElementById("texturePreview");
-  preview.src = url;
-  preview.classList.remove("hidden");
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    userTexture = textureLoader.load(event.target.result, () => updateText());
+    const preview = document.getElementById("texturePreview");
+    preview.src = event.target.result;
+    preview.classList.remove("hidden");
+  };
+  reader.readAsDataURL(file);
 });
 
-// Texture generation
+// Generate via Worker
 document.getElementById("generateTextureBtn").addEventListener("click", async () => {
   const prompt = document.getElementById("texturePrompt").value.trim();
-  if (!prompt) return alert("Enter a prompt!");
-
-  const btn = document.getElementById("generateTextureBtn");
-  btn.disabled = true;
-  btn.querySelector("span").textContent = "Generating...";
+  if (!prompt) return alert("Enter a prompt first!");
 
   try {
     const res = await fetch(`https://text-to-image.jessejesse.workers.dev/?prompt=${encodeURIComponent(prompt)}`);
+    if (!res.ok) throw new Error("Worker request failed");
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
-    userTexture = textureLoader.load(url);
+
+    userTexture = textureLoader.load(url, () => updateText());
     const preview = document.getElementById("texturePreview");
     preview.src = url;
     preview.classList.remove("hidden");
   } catch (err) {
     console.error(err);
-    alert("Texture generation failed");
-  } finally {
-    btn.disabled = false;
-    btn.querySelector("span").textContent = "Generate Texture";
+    alert("Texture generation failed.");
   }
 });
 
-// Create text
-function createText(text, color, fontName, depth, metalness = 0.5, roughness = 0.5) {
-  const fontUrl = `https://cdn.jsdelivr.net/npm/three@0.132.2/examples/fonts/${fontName}_regular.typeface.json`;
-  loader.load(
-    fontUrl,
-    font => {
-      const geometry = new THREE.TextGeometry(text, {
-        font,
-        size: 1,
-        height: depth,
-        curveSegments: 12,
-        bevelEnabled: true,
-        bevelThickness: 0.05,
-        bevelSize: 0.05,
-        bevelSegments: 3
-      });
-      geometry.center();
-
-      const material = userTexture
-        ? new THREE.MeshStandardMaterial({ map: userTexture, metalness, roughness })
-        : new THREE.MeshStandardMaterial({ color, metalness, roughness });
-
-      if (textMesh) scene.remove(textMesh);
-      textMesh = new THREE.Mesh(geometry, material);
-      scene.add(textMesh);
-      fitCameraToObject(textMesh);
-    },
-    undefined,
-    err => console.error(err)
-  );
-}
-
-// Generate button
-document.getElementById("generateBtn").addEventListener("click", () => {
-  const text = document.getElementById("textInput").value;
-  const color = document.getElementById("textColor").value;
-  const font = document.getElementById("fontStyle").value;
-  const depth = parseFloat(document.getElementById("depth").value);
-  const metalness = parseFloat(document.getElementById("metalness").value);
-  const roughness = parseFloat(document.getElementById("roughness").value);
-
-  document.getElementById("loading").classList.remove("hidden");
-  setTimeout(() => {
-    createText(text, color, font, depth, metalness, roughness);
-    document.getElementById("loading").classList.add("hidden");
-    document.getElementById("downloadBtn").disabled = false;
-  }, 100);
+// Sliders update
+["depth", "bevel", "curve"].forEach(id => {
+  document.getElementById(id).addEventListener("input", e => {
+    document.getElementById(id + "Value").textContent = e.target.value;
+    updateText();
+  });
 });
 
-// Download
+// Text & color
+document.getElementById("textInput").addEventListener("input", updateText);
+document.getElementById("textColor").addEventListener("input", updateText);
+document.getElementById("fontStyle").addEventListener("change", updateText);
+
+// Download GLB
 document.getElementById("downloadBtn").addEventListener("click", () => {
   if (!textMesh) return;
+  const exporter = new THREE.GLTFExporter();
+
   exporter.parse(
     textMesh,
     result => {
-      const blob =
-        result instanceof ArrayBuffer
-          ? new Blob([result], { type: "model/gltf-binary" })
-          : new Blob([JSON.stringify(result, null, 2)], { type: "model/gltf+json" });
+      const metadata = {
+        asset: { generator: "jessejesse.com Text-to-GLB", version: "2.0" },
+        extras: { author: "jessejesse.com" }
+      };
+      if (result.asset) Object.assign(result.asset, metadata.asset);
+      else result.asset = metadata.asset;
+      result.extras = metadata.extras;
+
+      const blob = result instanceof ArrayBuffer
+        ? new Blob([result], { type: "model/gltf-binary" })
+        : new Blob([JSON.stringify(result, null, 2)], { type: "model/gltf+json" });
+
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "3d-text.glb";
@@ -175,6 +149,7 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
 });
 
 init();
+
 
 
 
