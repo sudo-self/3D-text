@@ -100,12 +100,20 @@ document.getElementById("generateBtn").addEventListener("click", () => {
 
 document.getElementById("downloadBtn").addEventListener("click", () => {
   if (!textMesh) return;
+
   exporter.parse(
     textMesh,
     (result) => {
-      const blob = new Blob([JSON.stringify(result)], {
-        type: "model/gltf+json"
-      });
+      let blob;
+
+      if (result instanceof ArrayBuffer) {
+ 
+        blob = new Blob([result], { type: "model/gltf-binary" });
+      } else {
+
+        blob = new Blob([JSON.stringify(result, null, 2)], { type: "model/gltf+json" });
+      }
+
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "3d-text.glb";
