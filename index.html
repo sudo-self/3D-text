@@ -437,7 +437,7 @@ const downloadBtn = document.getElementById("downloadBtn");
 const formatSelect = document.getElementById("formatSelect");
 
 downloadBtn.addEventListener("click", () => {
-    if (!textMesh) return;
+    if (!textMesh) return alert("No 3D text generated yet!");
 
     const format = formatSelect.value;
 
@@ -445,32 +445,30 @@ downloadBtn.addEventListener("click", () => {
         exporter.parse(
             textMesh,
             result => {
-                const blob =
-                    result instanceof ArrayBuffer
-                        ? new Blob([result], { type: "model/gltf-binary" })
-                        : new Blob([JSON.stringify(result, null, 2)], { type: "model/gltf+json" });
+                const blob = result instanceof ArrayBuffer
+                    ? new Blob([result], { type: "model/gltf-binary" })
+                    : new Blob([JSON.stringify(result, null, 2)], { type: "model/gltf+json" });
+
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
                 link.download = "3d-text.glb";
-                document.body.appendChild(link);
                 link.click();
-                document.body.removeChild(link);
             },
             { binary: true }
         );
     } else if (format === "stl") {
         const stlExporter = new THREE.STLExporter();
-        // Generate ASCII STL (string)
-        const stlString = stlExporter.parse(textMesh, { binary: false }); 
-        const blob = new Blob([stlString], { type: "application/sla" }); 
+    
+        const stlString = stlExporter.parse(textMesh, { binary: false });
+        const blob = new Blob([stlString], { type: "application/sla" });
+
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = "3d-text.stl";
-        document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
     }
 });
+
 
 
 init();
