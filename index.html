@@ -460,8 +460,9 @@ downloadBtn.addEventListener("click", () => {
         );
     } else if (format === "stl") {
         const stlExporter = new THREE.STLExporter();
-        const stlString = stlExporter.parse(textMesh); // ASCII STL
-        const blob = new Blob([stlString], { type: "model/stl" });
+        // Generate ASCII STL (string)
+        const stlString = stlExporter.parse(textMesh, { binary: false }); 
+        const blob = new Blob([stlString], { type: "application/sla" }); 
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = "3d-text.stl";
@@ -470,6 +471,7 @@ downloadBtn.addEventListener("click", () => {
         document.body.removeChild(link);
     }
 });
+
 
 init();
 
