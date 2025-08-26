@@ -1,481 +1,700 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Text to 3D Model Generator</title>
-    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" href="/favicon.ico" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @keyframes gradient-x {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+      @keyframes gradient-x {
+        0% {
+          background-position: 0% 50%;
         }
-        .animate-gradient-x { background-size: 200% 200%; animation: gradient-x 4s ease infinite; }
-        .text-glow { text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.2); }
-        .hidden { display: none; }
-        #renderCanvas { width: 100%; height: 400px; }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+      .animate-gradient-x {
+        background-size: 200% 200%;
+        animation: gradient-x 4s ease infinite;
+      }
+      .text-glow {
+        text-shadow:
+          0 0 10px rgba(255, 255, 255, 0.3),
+          0 0 20px rgba(255, 255, 255, 0.2);
+      }
+      .hidden {
+        display: none;
+      }
+      #renderCanvas {
+        width: 100%;
+        height: 400px;
+        background-color: #f5f5f5;
+      }
+      .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
     </style>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
-</head>
+  </head>
 
-<body class="bg-gradient-to-br from-black via-gray-500 to-gray-900 min-h-screen flex flex-col items-center justify-start py-10 text-gray-800">
+  <body
+    class="bg-gradient-to-br from-black via-gray-500 to-gray-900 min-h-screen flex flex-col items-center justify-start py-10 text-gray-800"
+  >
     <div class="w-full max-w-5xl px-4">
-        <header class="text-center mb-10">
-            <h1 class="text-7xl font-extrabold mb-4 bg-gradient-to-r from-indigo-300 via-pink-300 to-yellow-300 bg-clip-text text-transparent animate-gradient-x text-glow">
-                Text to GLB
-            </h1>
+      <header class="text-center mb-10">
+        <h1
+          class="text-7xl font-extrabold mb-4 bg-gradient-to-r from-indigo-300 via-pink-300 to-yellow-300 bg-clip-text text-transparent animate-gradient-x text-glow"
+        >
+          Text to GLB
+        </h1>
 
-            <div class="flex justify-center gap-4 mb-4">
-                <a class="github-button" href="https://github.com/sudo-self/3D-text" 
-                   data-color-scheme="no-preference: light_high_contrast; light: light_high_contrast; dark: light;" 
-                   data-icon="octicon-star" data-size="large" 
-                   aria-label="Star sudo-self/3D-text on GitHub">Star</a>
+        <div class="flex justify-center gap-4 mb-4">
+          <a
+            class="github-button"
+            href="https://github.com/sudo-self/3D-text"
+            data-color-scheme="no-preference: light_high_contrast; light: light_high_contrast; dark: light;"
+            data-icon="octicon-star"
+            data-size="large"
+            aria-label="Star sudo-self/3D-text on GitHub"
+            >Star</a
+          >
 
-                <a class="github-button" href="https://github.com/sudo-self/3D-text/fork" 
-                   data-color-scheme="no-preference: light_high_contrast; light: light_high_contrast; dark: light;" 
-                   data-icon="octicon-repo-forked" data-size="large" 
-                   aria-label="Fork sudo-self/3D-text on GitHub">Fork</a>
-            </div>
+          <a
+            class="github-button"
+            href="https://github.com/sudo-self/3D-text/fork"
+            data-color-scheme="no-preference: light_high_contrast; light: light_high_contrast; dark: light;"
+            data-icon="octicon-repo-forked"
+            data-size="large"
+            aria-label="Fork sudo-self/3D-text on GitHub"
+            >Fork</a
+          >
+        </div>
 
-            <p class="text-lg text-cyan-500 hover:text-white">
-                &nbsp;<a href="https://text.JesseJesse.com">JesseJesse.com</a>
-            </p>
-        </header>
+        <p class="text-lg text-cyan-500 hover:text-white">
+          &nbsp;<a href="https://text.JesseJesse.com">JesseJesse.com</a>
+        </p>
+      </header>
 
-        <section class="bg-white rounded-3xl shadow-2xl p-8 mb-10">
-            <div class="grid gap-6">
-                <div>
-                    <label for="textInput" class="block mb-2 font-semibold text-gray-700">Enter Text</label>
-                    <input type="text" id="textInput" value="3D-Text" placeholder="Type your text here..." class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
-                </div>
+      <section class="bg-white rounded-3xl shadow-2xl p-8 mb-10">
+        <div class="grid gap-6">
+          <div>
+            <label
+              for="textInput"
+              class="block mb-2 font-semibold text-gray-700"
+              >Enter Text</label
+            >
+            <input
+              type="text"
+              id="textInput"
+              value="3D-Text"
+              placeholder="Type your text here..."
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+            />
+          </div>
 
-                <div>
-                    <label for="textColor" class="block mb-2 font-semibold text-gray-700">Text Color</label>
-                    <input type="color" id="textColor" value="#667eea" class="w-20 h-10 p-0 border-0 rounded-lg cursor-pointer">
-                </div>
+          <div>
+            <label
+              for="textColor"
+              class="block mb-2 font-semibold text-gray-700"
+              >Text Color</label
+            >
+            <input
+              type="color"
+              id="textColor"
+              value="#667eea"
+              class="w-20 h-10 p-0 border-0 rounded-lg cursor-pointer"
+            />
+          </div>
 
-                <div>
-                    <label for="textureInput" class="block mb-2 font-semibold text-gray-700">Texture Upload (optional)</label>
-                    <input type="file" id="textureInput" accept="image/*" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
-                    <img id="texturePreview" class="mt-2 w-24 h-24 object-cover rounded border border-gray-300 hidden">
-                </div>
+          <div>
+            <label
+              for="textureInput"
+              class="block mb-2 font-semibold text-gray-700"
+              >Texture Upload (optional)</label
+            >
+            <input
+              type="file"
+              id="textureInput"
+              accept="image/*"
+              class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+            />
+            <img
+              id="texturePreview"
+              class="mt-2 w-24 h-24 object-cover rounded border border-gray-300 hidden"
+            />
+          </div>
 
-                <div>
-                    <label for="texturePrompt" class="block mb-2 font-semibold text-gray-700">Texture Prompt (optional)</label>
-                    <input type="text" id="texturePrompt" placeholder="metallic rainbow, marble, sci-fi" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
-                    <button id="generateTextureBtn" class="relative inline-flex items-center justify-center p-0.5 mt-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group 
-                    bg-gradient-to-br from-purple-600 to-blue-500 
-                    hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-300">
-                        <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent">
-                            Generate Texture
-                        </span>
-                    </button>
-                </div>
+          <div>
+            <label
+              for="texturePrompt"
+              class="block mb-2 font-semibold text-gray-700"
+              >Texture Prompt (optional)</label
+            >
+            <input
+              type="text"
+              id="texturePrompt"
+              placeholder="metallic rainbow, marble, sci-fi"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+            />
+            <button
+              id="generateTextureBtn"
+              class="relative inline-flex items-center justify-center p-0.5 mt-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-300"
+            >
+              <span
+                class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent"
+              >
+                Generate Texture
+              </span>
+            </button>
+          </div>
 
-                <div>
-                    <label for="fontStyle" class="block mb-2 font-semibold text-gray-700">Font Style</label>
-                    <select id="fontStyle" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
-                        <option value="helvetiker">Helvetiker</option>
-                        <option value="optimer">Optimer</option>
-                        <option value="gentilis">Gentilis</option>
-                        <option value="droid_sans">Droid Sans</option>
-                    </select>
-                </div>
+          <div>
+            <label
+              for="fontStyle"
+              class="block mb-2 font-semibold text-gray-700"
+              >Font Style</label
+            >
+            <select
+              id="fontStyle"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+            >
+              <option value="helvetiker">Helvetiker</option>
+              <option value="optimer">Optimer</option>
+              <option value="gentilis">Gentilis</option>
+              <option value="droid_sans">Droid Sans</option>
+            </select>
+          </div>
 
-                <div>
-                    <label for="metalness" class="block mb-2 font-semibold text-gray-700">Metalness <span id="metalValue">0.50</span></label>
-                    <input type="range" id="metalness" min="0" max="1" step="0.01" value="0.5" class="w-full h-2 bg-gray-300 rounded-lg">
-                </div>
+          <div>
+            <label
+              for="metalness"
+              class="block mb-2 font-semibold text-gray-700"
+              >Metalness <span id="metalValue">0.50</span></label
+            >
+            <input
+              type="range"
+              id="metalness"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.5"
+              class="w-full h-2 bg-gray-300 rounded-lg"
+            />
+          </div>
 
-                <div>
-                    <label for="roughness" class="block mb-2 font-semibold text-gray-700">Roughness <span id="roughValue">0.50</span></label>
-                    <input type="range" id="roughness" min="0" max="1" step="0.01" value="0.5" class="w-full h-2 bg-gray-300 rounded-lg">
-                </div>
+          <div>
+            <label
+              for="roughness"
+              class="block mb-2 font-semibold text-gray-700"
+              >Roughness <span id="roughValue">0.50</span></label
+            >
+            <input
+              type="range"
+              id="roughness"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.5"
+              class="w-full h-2 bg-gray-300 rounded-lg"
+            />
+          </div>
 
-                <div>
-                    <label for="depth" class="block mb-2 font-semibold text-gray-700">Depth <span id="depthValue">0.50</span></label>
-                    <input type="range" id="depth" min="0.1" max="2" step="0.1" value="0.5" class="w-full h-2 bg-gray-300 rounded-lg cursor-pointer">
-                </div>
+          <div>
+            <label for="depth" class="block mb-2 font-semibold text-gray-700"
+              >Depth <span id="depthValue">0.50</span></label
+            >
+            <input
+              type="range"
+              id="depth"
+              min="0.1"
+              max="2"
+              step="0.1"
+              value="0.5"
+              class="w-full h-2 bg-gray-300 rounded-lg cursor-pointer"
+            />
+          </div>
 
-                <button id="generateBtn" class="relative inline-flex items-center justify-center p-0.5 mt-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group 
-                bg-gradient-to-br from-cyan-500 to-blue-500 
-                hover:text-white focus:outline-none focus:ring-4 focus:ring-cyan-200 w-full">
-                    <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent">
-                        Create 3D Text
-                    </span>
-                </button>
-            </div>
-        </section>
+          <button
+            id="generateBtn"
+            class="relative inline-flex items-center justify-center p-0.5 mt-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-cyan-500 to-blue-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-cyan-200 w-full"
+          >
+            <span
+              class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent"
+            >
+              Create 3D Text
+            </span>
+          </button>
+        </div>
+      </section>
 
-        <div id="loading" class="text-white text-center text-lg mb-6 hidden">Generating 3D model...</div>
+      <div id="loading" class="text-white text-center text-lg mb-6 hidden">
+        <div class="loading-spinner mb-2"></div>
+        Generating 3D model...
+      </div>
 
-        <section class="bg-white rounded-2xl shadow-2xl overflow-hidden mb-10">
-            <div id="renderCanvas"></div>
-        </section>
+      <section class="bg-white rounded-2xl shadow-2xl overflow-hidden mb-10">
+        <div id="renderCanvas"></div>
+      </section>
 
-       <div class="text-center flex flex-col items-center gap-2">
- 
-    <select id="formatSelect" class="p-2 rounded-lg border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400">
-        <option value="glb">3D Model (GLB)</option>
-        <option value="stl">3D Printer (STL)</option>
-    </select>
+      <div class="text-center flex flex-col items-center gap-2">
+        <select
+          id="formatSelect"
+          class="p-2 rounded-lg border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400"
+        >
+          <option value="glb">3D Model (GLB)</option>
+          <option value="stl">3D Printer (STL)</option>
+        </select>
 
-   
-    <button id="downloadBtn" class="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group
-        bg-gradient-to-br from-green-400 to-blue-600 
-        hover:text-white focus:outline-none focus:ring-4 focus:ring-green-200" disabled>
-        <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent">
+        <button
+          id="downloadBtn"
+          class="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 hover:text-white focus:outline-none focus:ring-4 focus:ring-green-200"
+          disabled
+        >
+          <span
+            class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent"
+          >
             Download
-        </span>
-    </button>
-</div>
-
+          </span>
+        </button>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/FontLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/exporters/GLTFExporter.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/exporters/STLExporter.js"></script>
+
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            let scene, camera, renderer, controls, textMesh;
-            const loader = new THREE.FontLoader();
-            const exporter = new THREE.GLTFExporter();
-            const textureLoader = new THREE.TextureLoader();
-            let userTexture = null;
-            let currentFont = null;
+      document.addEventListener("DOMContentLoaded", () => {
+        let scene, camera, renderer, controls, textMesh;
+        const loader = new THREE.FontLoader();
+        const exporter = new THREE.GLTFExporter();
+        const textureLoader = new THREE.TextureLoader();
+        let userTexture = null;
+        let currentFont = null;
 
-            const canvasContainer = document.getElementById("renderCanvas");
+        const canvasContainer = document.getElementById("renderCanvas");
 
-            function init() {
+        function init() {
+          if (renderer) {
+            renderer.dispose();
+            if (canvasContainer.contains(renderer.domElement)) {
+              canvasContainer.removeChild(renderer.domElement);
+            }
+          }
+
+          const width = canvasContainer.clientWidth;
+          const height = canvasContainer.clientHeight;
+
+          scene = new THREE.Scene();
+          scene.background = new THREE.Color(0xffffff);
+
+          camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+          camera.position.set(0, 2, 6);
+
+          renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            preserveDrawingBuffer: true // Allows for screenshot functionality
+          });
+          renderer.setSize(width, height);
+          renderer.setPixelRatio(window.devicePixelRatio);
+          canvasContainer.appendChild(renderer.domElement);
+
+          controls = new THREE.OrbitControls(camera, renderer.domElement);
+          controls.enableDamping = true;
+          controls.dampingFactor = 0.05;
+
+          const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+          scene.add(ambient);
+          const dir = new THREE.DirectionalLight(0xffffff, 1);
+          dir.position.set(5, 10, 5);
+          scene.add(dir);
+
+          // Add a grid helper for better spatial reference
+          const gridHelper = new THREE.GridHelper(10, 10);
+          gridHelper.visible = false; // Hidden by default
+          scene.add(gridHelper);
+
+          window.addEventListener("resize", onWindowResize);
+          animate();
+        }
+
+        function onWindowResize() {
+          camera.aspect =
+            canvasContainer.clientWidth / canvasContainer.clientHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(
+            canvasContainer.clientWidth,
+            canvasContainer.clientHeight,
+          );
+        }
+
+        function animate() {
+          requestAnimationFrame(animate);
+          controls.update();
+          renderer.render(scene, camera);
+        }
+
+        function fitCameraToObject(object) {
+          const box = new THREE.Box3().setFromObject(object);
+          const size = box.getSize(new THREE.Vector3());
+          const center = box.getCenter(new THREE.Vector3());
+
+          const originalPosition = object.position.clone();
+
+          object.position.sub(center);
+
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const fov = camera.fov * (Math.PI / 180);
+          let cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2))) * 1.5;
+
+          cameraZ = Math.max(cameraZ, 2);
+
+          camera.position.set(0, maxDim * 0.5, cameraZ);
+          camera.lookAt(0, 0, 0);
+
+          object.position.copy(originalPosition);
+
+          controls.update();
+        }
+
+        function createText(
+          text,
+          color,
+          fontName,
+          depth,
+          metalness = 0.5,
+          roughness = 0.5,
+        ) {
+          const fontUrl = `https://cdn.jsdelivr.net/npm/three@0.132.2/examples/fonts/${fontName}_regular.typeface.json`;
+
+          loader.load(
+            fontUrl,
+            (font) => {
+              currentFont = font;
+
+              const geometry = new THREE.TextGeometry(text, {
+                font,
+                size: 1,
+                height: depth,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 0.05,
+                bevelSize: 0.05,
+                bevelSegments: 3,
+              });
+              geometry.center();
+
+              const material = userTexture
+                ? new THREE.MeshStandardMaterial({
+                    map: userTexture,
+                    metalness: metalness,
+                    roughness: roughness,
+                  })
+                : new THREE.MeshStandardMaterial({
+                    color: color,
+                    metalness: metalness,
+                    roughness: roughness,
+                  });
+
+              if (textMesh) {
+                scene.remove(textMesh);
+                // Dispose of old geometry and material to prevent memory leaks
+                if (textMesh.geometry) textMesh.geometry.dispose();
+                if (textMesh.material) {
+                  // Only dispose if it's not being used elsewhere
+                  if (Array.isArray(textMesh.material)) {
+                    textMesh.material.forEach(m => m.dispose());
+                  } else {
+                    textMesh.material.dispose();
+                  }
+                }
+              }
+
+              textMesh = new THREE.Mesh(geometry, material);
+              scene.add(textMesh);
+              fitCameraToObject(textMesh);
+
+              // Update slider displays
+              document.getElementById("metalValue").textContent =
+                metalness.toFixed(2);
+              document.getElementById("roughValue").textContent =
+                roughness.toFixed(2);
+              document.getElementById("depthValue").textContent =
+                depth.toFixed(2);
+
+              document.getElementById("loading").classList.add("hidden");
+              document.getElementById("downloadBtn").disabled = false;
+            },
+            undefined,
+            (err) => {
+              console.error("Error loading font:", err);
+              document.getElementById("loading").classList.add("hidden");
+              alert("Failed to load font. Please try again.");
+            },
+          );
+        }
+
+        // Set up event listeners
+        const metalSlider = document.getElementById("metalness");
+        const roughSlider = document.getElementById("roughness");
+        const depthSlider = document.getElementById("depth");
+
+        metalSlider.addEventListener("input", (e) => {
+          const value = parseFloat(e.target.value);
+          document.getElementById("metalValue").textContent = value.toFixed(2);
+          if (textMesh && textMesh.material) {
+            textMesh.material.metalness = value;
+            textMesh.material.needsUpdate = true;
+          }
+        });
+
+        roughSlider.addEventListener("input", (e) => {
+          const value = parseFloat(e.target.value);
+          document.getElementById("roughValue").textContent = value.toFixed(2);
+          if (textMesh && textMesh.material) {
+            textMesh.material.roughness = value;
+            textMesh.material.needsUpdate = true;
+          }
+        });
+
+        depthSlider.addEventListener("input", (e) => {
+          const value = parseFloat(e.target.value);
+          document.getElementById("depthValue").textContent = value.toFixed(2);
+          if (textMesh && textMesh.geometry && currentFont) {
+            const text = textMesh.geometry.parameters.text;
+
+            textMesh.geometry.dispose();
+
+            const geom = new THREE.TextGeometry(text, {
+              font: currentFont,
+              size: 1,
+              height: value,
+              curveSegments: 12,
+              bevelEnabled: true,
+              bevelThickness: 0.05,
+              bevelSize: 0.05,
+              bevelSegments: 3,
+            });
+            geom.center();
+            textMesh.geometry = geom;
+            fitCameraToObject(textMesh);
+          }
+        });
+
+        const textureInput = document.getElementById("textureInput");
+        const texturePreview = document.getElementById("texturePreview");
+        textureInput.addEventListener("change", (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          if (userTexture) {
+            userTexture.dispose();
+          }
+
+          const url = URL.createObjectURL(file);
+          userTexture = textureLoader.load(
+            url,
+            () => {
+              texturePreview.src = url;
+              texturePreview.classList.remove("hidden");
+
+              if (textMesh && textMesh.material) {
+                textMesh.material.map = userTexture;
+                textMesh.material.needsUpdate = true;
+              }
+            },
+            undefined,
+            (err) => {
+              console.error("Error loading texture:", err);
+              alert("Failed to load texture. Please try another image.");
+            },
+          );
+        });
+
+        const generateTextureBtn =
+          document.getElementById("generateTextureBtn");
+        generateTextureBtn.addEventListener("click", async () => {
+          const prompt = document.getElementById("texturePrompt").value.trim();
+          if (!prompt) return alert("Enter a prompt!");
+
+          generateTextureBtn.disabled = true;
+          generateTextureBtn.querySelector("span").textContent =
+            "Generating...";
+
+          try {
+            // Fallback texture generation if the API is unavailable
+            let textureUrl;
+            try {
+              const res = await fetch(
+                `https://text-to-image.jessejesse.workers.dev/?prompt=${encodeURIComponent(prompt)}`,
+                { 
+                  method: 'GET',
+                  headers: {
+                    'Accept': 'image/*'
+                  }
+                }
+              );
               
-                if (renderer) {
-                    renderer.dispose();
-                    if (canvasContainer.contains(renderer.domElement)) {
-                        canvasContainer.removeChild(renderer.domElement);
-                    }
-                }
-
-                const width = canvasContainer.clientWidth;
-                const height = canvasContainer.clientHeight;
-
-                scene = new THREE.Scene();
-                scene.background = new THREE.Color(0xffffff);
-
-                camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-                camera.position.set(0, 2, 6);
-
-                renderer = new THREE.WebGLRenderer({ antialias: true });
-                renderer.setSize(width, height);
-                canvasContainer.appendChild(renderer.domElement);
-
-                controls = new THREE.OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = true;
-
-                const ambient = new THREE.AmbientLight(0xffffff, 0.8);
-                scene.add(ambient);
-                const dir = new THREE.DirectionalLight(0xffffff, 1);
-                dir.position.set(5, 10, 5);
-                scene.add(dir);
-
-                window.addEventListener("resize", onWindowResize);
-                animate();
-            }
-
-            function onWindowResize() {
-                camera.aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-            }
-
-            function animate() {
-                requestAnimationFrame(animate);
-                controls.update();
-                renderer.render(scene, camera);
-            }
-
-            function fitCameraToObject(object) {
-                const box = new THREE.Box3().setFromObject(object);
-                const size = box.getSize(new THREE.Vector3());
-                const center = box.getCenter(new THREE.Vector3());
-                
-               
-                const originalPosition = object.position.clone();
-                
-             
-                object.position.sub(center);
-                
-                const maxDim = Math.max(size.x, size.y, size.z);
-                const fov = camera.fov * (Math.PI / 180);
-                let cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2))) * 1.5;
-                
+              if (!res.ok) {
+                throw new Error(`Server returned ${res.status}`);
+              }
               
-                cameraZ = Math.max(cameraZ, 2);
-                
-                camera.position.set(0, maxDim * 0.5, cameraZ);
-                camera.lookAt(0, 0, 0);
-                
-       
-                object.position.copy(originalPosition);
-                
-                controls.update();
+              const blob = await res.blob();
+              textureUrl = URL.createObjectURL(blob);
+            } catch (apiError) {
+              console.warn("API texture generation failed, using fallback:", apiError);
+              // Create a fallback gradient texture
+              const canvas = document.createElement('canvas');
+              canvas.width = 256;
+              canvas.height = 256;
+              const ctx = canvas.getContext('2d');
+              
+              const gradient = ctx.createLinearGradient(0, 0, 256, 256);
+              gradient.addColorStop(0, 'red');
+              gradient.addColorStop(0.5, 'blue');
+              gradient.addColorStop(1, 'green');
+              
+              ctx.fillStyle = gradient;
+              ctx.fillRect(0, 0, 256, 256);
+              
+              ctx.font = '20px Arial';
+              ctx.fillStyle = 'white';
+              ctx.fillText(prompt.substring(0, 15), 10, 30);
+              
+              textureUrl = canvas.toDataURL('image/png');
             }
 
-            function createText(text, color, fontName, depth, metalness = 0.5, roughness = 0.5) {
-                const fontUrl = `https://cdn.jsdelivr.net/npm/three@0.132.2/examples/fonts/${fontName}_regular.typeface.json`;
-                
-                loader.load(
-                    fontUrl,
-                    font => {
-                        currentFont = font;
-                        
-                        const geometry = new THREE.TextGeometry(text, {
-                            font,
-                            size: 1,
-                            height: depth,
-                            curveSegments: 12,
-                            bevelEnabled: true,
-                            bevelThickness: 0.05,
-                            bevelSize: 0.05,
-                            bevelSegments: 3
-                        });
-                        geometry.center();
-
-                        const material = userTexture
-                            ? new THREE.MeshStandardMaterial({ 
-                                map: userTexture, 
-                                metalness: metalness, 
-                                roughness: roughness 
-                            })
-                            : new THREE.MeshStandardMaterial({ 
-                                color: color, 
-                                metalness: metalness, 
-                                roughness: roughness 
-                            });
-
-                        if (textMesh) {
-                            scene.remove(textMesh);
-                            // Dispose of old geometry and material to prevent memory leaks
-                            if (textMesh.geometry) textMesh.geometry.dispose();
-                            if (textMesh.material) textMesh.material.dispose();
-                        }
-                        
-                        textMesh = new THREE.Mesh(geometry, material);
-                        scene.add(textMesh);
-                        fitCameraToObject(textMesh);
-
-                        // Update slider displays
-                        document.getElementById("metalValue").textContent = metalness.toFixed(2);
-                        document.getElementById("roughValue").textContent = roughness.toFixed(2);
-                        document.getElementById("depthValue").textContent = depth.toFixed(2);
-                        
-                        document.getElementById("loading").classList.add("hidden");
-                        document.getElementById("downloadBtn").disabled = false;
-                    },
-                    undefined,
-                    err => {
-                        console.error("Error loading font:", err);
-                        document.getElementById("loading").classList.add("hidden");
-                        alert("Failed to load font. Please try again.");
-                    }
-                );
+            if (userTexture) {
+              userTexture.dispose();
             }
 
-            // Set up event listeners
-            const metalSlider = document.getElementById("metalness");
-            const roughSlider = document.getElementById("roughness");
-            const depthSlider = document.getElementById("depth");
+            userTexture = textureLoader.load(
+              textureUrl,
+              () => {
+                texturePreview.src = textureUrl;
+                texturePreview.classList.remove("hidden");
 
-            metalSlider.addEventListener("input", e => {
-                const value = parseFloat(e.target.value);
-                document.getElementById("metalValue").textContent = value.toFixed(2);
                 if (textMesh && textMesh.material) {
-                    textMesh.material.metalness = value;
-                    textMesh.material.needsUpdate = true;
+                  textMesh.material.map = userTexture;
+                  textMesh.material.needsUpdate = true;
                 }
-            });
+              },
+              undefined,
+              (err) => {
+                console.error("Error loading generated texture:", err);
+                alert("Failed to load generated texture.");
+              },
+            );
+          } catch (err) {
+            console.error("Texture generation failed:", err);
+            alert("Texture generation failed. Please try again.");
+          } finally {
+            generateTextureBtn.disabled = false;
+            generateTextureBtn.querySelector("span").textContent =
+              "Generate Texture";
+          }
+        });
 
-            roughSlider.addEventListener("input", e => {
-                const value = parseFloat(e.target.value);
-                document.getElementById("roughValue").textContent = value.toFixed(2);
-                if (textMesh && textMesh.material) {
-                    textMesh.material.roughness = value;
-                    textMesh.material.needsUpdate = true;
-                }
-            });
+        const generateBtn = document.getElementById("generateBtn");
+        generateBtn.addEventListener("click", () => {
+          const text = document.getElementById("textInput").value;
+          if (!text) return alert("Please enter some text!");
 
-            depthSlider.addEventListener("input", e => {
-                const value = parseFloat(e.target.value);
-                document.getElementById("depthValue").textContent = value.toFixed(2);
-                if (textMesh && textMesh.geometry && currentFont) {
-                    const text = textMesh.geometry.parameters.text;
-                    
-           
-                    textMesh.geometry.dispose();
-                    
-                    const geom = new THREE.TextGeometry(
-                        text,
-                        {
-                            font: currentFont,
-                            size: 1,
-                            height: value,
-                            curveSegments: 12,
-                            bevelEnabled: true,
-                            bevelThickness: 0.05,
-                            bevelSize: 0.05,
-                            bevelSegments: 3
-                        }
-                    );
-                    geom.center();
-                    textMesh.geometry = geom;
-                    fitCameraToObject(textMesh);
-                }
-            });
+          const color = document.getElementById("textColor").value;
+          const font = document.getElementById("fontStyle").value;
+          const depth = parseFloat(depthSlider.value);
+          const metalness = parseFloat(metalSlider.value);
+          const roughness = parseFloat(roughSlider.value);
 
-            const textureInput = document.getElementById("textureInput");
-            const texturePreview = document.getElementById("texturePreview");
-            textureInput.addEventListener("change", e => {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-            
-                if (userTexture) {
-                    userTexture.dispose();
-                }
-                
-                const url = URL.createObjectURL(file);
-                userTexture = textureLoader.load(
-                    url,
-                    () => {
-                        texturePreview.src = url;
-                        texturePreview.classList.remove("hidden");
-                        
-                      
-                        if (textMesh && textMesh.material) {
-                            textMesh.material.map = userTexture;
-                            textMesh.material.needsUpdate = true;
-                        }
-                    },
-                    undefined,
-                    err => {
-                        console.error("Error loading texture:", err);
-                        alert("Failed to load texture. Please try another image.");
-                    }
-                );
-            });
+          document.getElementById("loading").classList.remove("hidden");
+          document.getElementById("downloadBtn").disabled = true;
 
-            const generateTextureBtn = document.getElementById("generateTextureBtn");
-            generateTextureBtn.addEventListener("click", async () => {
-                const prompt = document.getElementById("texturePrompt").value.trim();
-                if (!prompt) return alert("Enter a prompt!");
+          setTimeout(() => {
+            createText(text, color, font, depth, metalness, roughness);
+          }, 100);
+        });
 
-                generateTextureBtn.disabled = true;
-                generateTextureBtn.querySelector("span").textContent = "Generating...";
+        const downloadBtn = document.getElementById("downloadBtn");
+        const formatSelect = document.getElementById("formatSelect");
 
-                try {
-                    const res = await fetch(`https://text-to-image.jessejesse.workers.dev/?prompt=${encodeURIComponent(prompt)}`);
-                    if (!res.ok) throw new Error(`Server returned ${res.status}`);
-                    
-                    const blob = await res.blob();
-                    const url = URL.createObjectURL(blob);
-                    
-           
-                    if (userTexture) {
-                        userTexture.dispose();
-                    }
-                    
-                    userTexture = textureLoader.load(
-                        url,
-                        () => {
-                            texturePreview.src = url;
-                            texturePreview.classList.remove("hidden");
-                            
-                          
-                            if (textMesh && textMesh.material) {
-                                textMesh.material.map = userTexture;
-                                textMesh.material.needsUpdate = true;
-                            }
-                        },
-                        undefined,
-                        err => {
-                            console.error("Error loading generated texture:", err);
-                            alert("Failed to load generated texture.");
-                        }
-                    );
-                } catch (err) {
-                    console.error("Texture generation failed:", err);
-                    alert("Texture generation failed. Please try again.");
-                } finally {
-                    generateTextureBtn.disabled = false;
-                    generateTextureBtn.querySelector("span").textContent = "Generate Texture";
-                }
-            });
+        downloadBtn.addEventListener("click", () => {
+          if (!textMesh) return alert("No 3D text generated yet!");
 
-            const generateBtn = document.getElementById("generateBtn");
-            generateBtn.addEventListener("click", () => {
-                const text = document.getElementById("textInput").value;
-                if (!text) return alert("Please enter some text!");
-                
-                const color = document.getElementById("textColor").value;
-                const font = document.getElementById("fontStyle").value;
-                const depth = parseFloat(depthSlider.value);
-                const metalness = parseFloat(metalSlider.value);
-                const roughness = parseFloat(roughSlider.value);
+          const format = formatSelect.value;
 
-                document.getElementById("loading").classList.remove("hidden");
-                
-            
-                setTimeout(() => {
-                    createText(text, color, font, depth, metalness, roughness);
-                }, 100);
-            });
-
-const downloadBtn = document.getElementById("downloadBtn");
-const formatSelect = document.getElementById("formatSelect");
-
-downloadBtn.addEventListener("click", () => {
-    if (!textMesh) return alert("No 3D text generated yet!");
-
-    const format = formatSelect.value;
-
-    if (format === "glb") {
-        exporter.parse(
-            textMesh,
-            result => {
-                const blob = result instanceof ArrayBuffer
+          if (format === "glb") {
+            exporter.parse(
+              textMesh,
+              (result) => {
+                const blob =
+                  result instanceof ArrayBuffer
                     ? new Blob([result], { type: "model/gltf-binary" })
-                    : new Blob([JSON.stringify(result, null, 2)], { type: "model/gltf+json" });
+                    : new Blob([JSON.stringify(result, null, 2)], {
+                        type: "model/gltf+json",
+                      });
 
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
                 link.download = "3d-text.glb";
+                document.body.appendChild(link);
                 link.click();
-            },
-            { binary: true }
-        );
-    } else if (format === "stl") {
-        const stlExporter = new THREE.STLExporter();
-    
-        const stlString = stlExporter.parse(textMesh, { binary: false });
-        const blob = new Blob([stlString], { type: "application/sla" });
+                document.body.removeChild(link);
+                
+                // Clean up the URL object after download
+                setTimeout(() => URL.revokeObjectURL(link.href), 100);
+              },
+              { binary: true },
+            );
+          } else if (format === "stl") {
+            // Check if STLExporter is available
+            if (typeof THREE.STLExporter === 'undefined') {
+              alert("STL export is not supported in this version. Please try GLB format.");
+              return;
+            }
+            
+            const stlExporter = new THREE.STLExporter();
+            const stlString = stlExporter.parse(textMesh, { binary: false });
+            const blob = new Blob([stlString], { type: "application/sla" });
 
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "3d-text.stl";
-        link.click();
-    }
-});
-
-
-
-init();
-
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "3d-text.stl";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up the URL object after download
+            setTimeout(() => URL.revokeObjectURL(link.href), 100);
+          }
         });
+
+        // Initialize the scene
+        init();
+        
+        // Generate initial text
+        setTimeout(() => {
+          document.getElementById("generateBtn").click();
+        }, 500);
+      });
     </script>
-</body>
+  </body>
 </html>
 
 
