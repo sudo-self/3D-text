@@ -115,15 +115,23 @@
             <div id="renderCanvas"></div>
         </section>
 
-        <div class="text-center">
-            <button id="downloadBtn" class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group
-            bg-gradient-to-br from-green-400 to-blue-600 
-            hover:text-white focus:outline-none focus:ring-4 focus:ring-green-200" disabled>
-                <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent">
-                    Download
-                </span>
-            </button>
-        </div>
+       <div class="text-center flex flex-col items-center gap-2">
+ 
+    <select id="formatSelect" class="p-2 rounded-lg border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400">
+        <option value="glb">3D Model (GLB)</option>
+        <option value="stl">3D Printer (STL)</option>
+    </select>
+
+   
+    <button id="downloadBtn" class="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group
+        bg-gradient-to-br from-green-400 to-blue-600 
+        hover:text-white focus:outline-none focus:ring-4 focus:ring-green-200" disabled>
+        <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent">
+            Download
+        </span>
+    </button>
+</div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
@@ -425,30 +433,46 @@
                 }, 100);
             });
 
-            const downloadBtn = document.getElementById("downloadBtn");
-            downloadBtn.addEventListener("click", () => {
-                if (!textMesh) return;
-                
-                exporter.parse(
-                    textMesh,
-                    result => {
-                        const blob =
-                            result instanceof ArrayBuffer
-                                ? new Blob([result], { type: "model/gltf-binary" })
-                                : new Blob([JSON.stringify(result, null, 2)], { type: "model/gltf+json" });
-                        const link = document.createElement("a");
-                        link.href = URL.createObjectURL(blob);
-                        link.download = "3d-text.glb";
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    },
-                    { binary: true }
-                );
-            });
+const downloadBtn = document.getElementById("downloadBtn");
+const formatSelect = document.getElementById("formatSelect");
 
-         
-            init();
+downloadBtn.addEventListener("click", () => {
+    if (!textMesh) return;
+
+    const format = formatSelect.value;
+
+    if (format === "glb") {
+        exporter.parse(
+            textMesh,
+            result => {
+                const blob =
+                    result instanceof ArrayBuffer
+                        ? new Blob([result], { type: "model/gltf-binary" })
+                        : new Blob([JSON.stringify(result, null, 2)], { type: "model/gltf+json" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "3d-text.glb";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            { binary: true }
+        );
+    } else if (format === "stl") {
+        const stlExporter = new THREE.STLExporter();
+        const stlString = stlExporter.parse(textMesh); // ASCII STL
+        const blob = new Blob([stlString], { type: "model/stl" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "3d-text.stl";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+});
+
+init();
+
         });
     </script>
 </body>
