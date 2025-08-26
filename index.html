@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Text to 3D Generator</title>
     <link rel="icon" href="/favicon.ico" />
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-       
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
@@ -74,24 +74,25 @@
         background-size: 200% 200%;
         animation: gradient-x 4s ease infinite;
       }
-        footer {
-          padding: 1rem 0;
-          color: #4b5563;
-          font-size: 0.875rem;
-          text-align: center;
-        }
+      footer {
+        padding: 1rem 0;
+        color: #4b5563;
+        font-size: 0.875rem;
+        text-align: center;
+      }
 
-        footer a {
-          color: inherit;
-          text-decoration: none;
-          transition: color 0.2s ease, text-decoration 0.2s ease;
-        }
+      footer a {
+        color: inherit;
+        text-decoration: none;
+        transition:
+          color 0.2s ease,
+          text-decoration 0.2s ease;
+      }
 
-        footer a:hover {
-          color: #111827;
-          text-decoration: underline;
-        }
-
+      footer a:hover {
+        color: #111827;
+        text-decoration: underline;
+      }
 
       .loading-spinner {
         border: 4px solid #f3f3f3;
@@ -160,7 +161,7 @@
             aria-label="Fork sudo-self/3D-text on GitHub"
             >Fork</a
           >
-<<<<<<< HEAD
+
           <a
             class="github-button"
             href="https://github.com/sudo-self"
@@ -171,19 +172,11 @@
             >Follow @sudo-self</a
           >
         </div>
-=======
-          <a class="github-button"
-          href="https://github.com/sudo-self" 
-          data-color-scheme="no-preference: 
-          light_high_contrast; light: light_high_contrast; dark: light_high_contrast;" 
-          data-size="large" aria-label="Follow @sudo-self on GitHub"
-          >Follow @sudo-self</a>
-        </div>
 
-      <p class="text-sm text-emerald-500">Powered by</p><p class="text-lg text-cyan-500 hover:text-white">
-          &nbsp;<a href="https://text.sudo-self.com">sudo-self.com</a><p class="text-sm text-orange-500">@cf/stabilityai/</p>
+        <p class="text-sm text-emerald-600">Powered by</p>
+        <p class="text-lg text-indigo-600 hover:text-cyan-400">
+          &nbsp;<a href="https://text.sudo-self.com">sudo-self.com</a>
         </p>
->>>>>>> 19205cff9cdc0cdf540613aefbdb53c2d8899154
       </header>
 
       <section class="card mb-8">
@@ -345,11 +338,17 @@
         </button>
       </div>
     </div>
-      <footer class="text-center mt-10 mb-4 text-gray-600 text-sm">
-        <p>© <span id="year"></span> <a href="https://text.sudo-self.com" target="_blank" class="hover:underline">text.sudo-self.com</a></p>
-      </footer>
-
-
+    <footer class="text-center mt-10 mb-4 text-gray-600 text-sm">
+      <p>
+        © <span id="year"></span>
+        <a
+          href="https://text.sudo-self.com"
+          target="_blank"
+          class="hover:underline"
+          >text.sudo-self.com</a
+        >
+      </p>
+    </footer>
 
     <div id="toast" class="toast"></div>
 
@@ -398,9 +397,8 @@
         };
 
         function showToast(msg, type = "info", duration = 3000) {
-          console.log(`[${type}] ${msg}`); 
+          console.log(`[${type}] ${msg}`);
         }
-
 
         function initThree() {
           const width = elements.renderCanvas.clientWidth;
@@ -436,7 +434,6 @@
           dir.position.set(5, 10, 5);
           state.scene.add(ambient, dir);
 
-        
           const gridHelper = new THREE.GridHelper(10, 10);
           gridHelper.visible = false;
           state.scene.add(gridHelper);
@@ -474,7 +471,6 @@
 
         async function generateTexture(prompt) {
           try {
-      
             const res = await fetch(
               `https://text-to-image.jessejesse.workers.dev/?prompt=${encodeURIComponent(prompt)}`,
             );
@@ -482,7 +478,6 @@
             const blob = await res.blob();
             return URL.createObjectURL(blob);
           } catch (e) {
-         
             showToast(
               "Texture API unavailable, using fallback texture",
               "info",
@@ -492,14 +487,12 @@
             canvas.height = 512;
             const ctx = canvas.getContext("2d");
 
-       
             const grad = ctx.createLinearGradient(0, 0, 512, 512);
             grad.addColorStop(0, `hsl(${Math.random() * 360}, 70%, 60%)`);
             grad.addColorStop(1, `hsl(${Math.random() * 360}, 70%, 40%)`);
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, 512, 512);
 
-        
             ctx.fillStyle = "rgba(255,255,255,0.1)";
             for (let i = 0; i < 100; i++) {
               ctx.beginPath();
@@ -513,7 +506,6 @@
               ctx.fill();
             }
 
-        
             ctx.font = "30px Arial";
             ctx.fillStyle = "rgba(255,255,255,0.7)";
             ctx.fillText(prompt.substring(0, 20), 20, 50);
@@ -526,7 +518,6 @@
           const url = await generateTexture(prompt);
           const tex = state.textureLoader.load(url, () => {
             if (mesh.material) {
-         
               if (mesh.material.map) mesh.material.map.dispose();
 
               mesh.material.map = tex;
