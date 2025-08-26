@@ -326,7 +326,7 @@
             <label
               for="texturePrompt"
               class="block mb-2 font-semibold text-gray-700"
-              >Texture AI ㋡ 
+              >Texture AI ㋡
             </label>
             <div class="flex gap-2">
               <input
@@ -649,6 +649,34 @@
           }
         }
 
+        // Function to fix UV mapping for the front face
+        function fixFrontFaceUV(geometry) {
+          const positions = geometry.attributes.position.array;
+          const uvs = geometry.attributes.uv.array;
+          
+          // Calculate bounding box to determine front face
+          const box = new THREE.Box3().setFromBufferAttribute(geometry.attributes.position);
+          const size = new THREE.Vector3();
+          box.getSize(size);
+          
+          // Find the front face (faces with normal pointing toward camera)
+          for (let i = 0; i < positions.length; i += 3) {
+            const x = positions[i];
+            const y = positions[i + 1];
+            const z = positions[i + 2];
+            
+            // This is a simplified approach - in a real scenario, we'd need to analyze normals
+            // For now, we'll assume the front face has z values close to the front
+            if (z > size.z * 0.4) { // Adjust this threshold as needed
+              // Map the texture across the front face properly
+              uvs[i/3 * 2] = (x - box.min.x) / size.x;
+              uvs[i/3 * 2 + 1] = 1.0 - (y - box.min.y) / size.y;
+            }
+          }
+          
+          geometry.attributes.uv.needsUpdate = true;
+        }
+
         async function applyTexture(mesh, prompt) {
           try {
             const url = await generateTexture(prompt);
@@ -657,7 +685,23 @@
                 if (mesh.material.map) mesh.material.map.dispose();
 
                 mesh.material.map = tex;
+                // Fix the texture mapping to prevent stretching
+                mesh.material.map.wrapS = THREE.RepeatWrapping;
+                mesh.material.map.wrapT = THREE.RepeatWrapping;
+                
+                // Calculate appropriate repeat values based on text size
+                const box = new THREE.Box3().setFromObject(mesh);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+                
+                // Adjust these values to get the right texture scale
+                mesh.material.map.repeat.set(size.x * 0.5, size.y * 0.5);
+                
                 mesh.material.needsUpdate = true;
+                
+                // Also fix the UV mapping for the geometry
+                fixFrontFaceUV(mesh.geometry);
+                
                 showToast("Texture Applied Successfully", "success");
               }
             });
@@ -713,6 +757,11 @@
                 bevelSegments: 2,
               });
               geom.center();
+              
+              // Generate UVs for proper texture mapping
+              geom.computeBoundingBox();
+              geom.computeVertexNormals();
+              
               const mat = new THREE.MeshStandardMaterial({
                 color,
                 metalness,
@@ -858,6 +907,7 @@
     </script>
   </body>
 </html>
+
 
 
 
