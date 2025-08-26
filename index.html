@@ -414,10 +414,10 @@
 
               if (textMesh) {
                 scene.remove(textMesh);
-                // Dispose of old geometry and material to prevent memory leaks
+               
                 if (textMesh.geometry) textMesh.geometry.dispose();
                 if (textMesh.material) {
-                  // Only dispose if it's not being used elsewhere
+             
                   if (Array.isArray(textMesh.material)) {
                     textMesh.material.forEach(m => m.dispose());
                   } else {
@@ -538,7 +538,7 @@
             "Generating...";
 
           try {
-            // Fallback texture generation if the API is unavailable
+          
             let textureUrl;
             try {
               const res = await fetch(
@@ -611,10 +611,16 @@
           }
         });
 
-        const generateBtn = document.getElementById("generateBtn");
-        generateBtn.addEventListener("click", () => {
-          const text = document.getElementById("textInput").value;
-          if (!text) return alert("Please enter some text!");
+       const generateBtn = document.getElementById("generateBtn");
+
+generateBtn.addEventListener("click", () => {
+  const inputEl = document.getElementById("textInput");
+  const text = inputEl.value.trim() || "add some text";
+
+  console.log("Using text:", text);
+  // your generate code here...
+});
+
 
           const color = document.getElementById("textColor").value;
           const font = document.getElementById("fontStyle").value;
