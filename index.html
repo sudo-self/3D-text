@@ -44,6 +44,9 @@
       .toast.info {
         background-color: #3b82f6;
       }
+      .toast.warning {
+        background-color: #f59e0b;
+      }
       .card {
         background: white;
         border-radius: 12px;
@@ -125,6 +128,51 @@
       .animate-gradient-x {
         background-size: 200% 200%;
         animation: gradient-x 4s ease infinite;
+      }
+      
+      /* Texture generation feedback styles */
+      .texture-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        font-size: 14px;
+        color: #6b7280;
+      }
+      
+      .texture-progress {
+        width: 100%;
+        height: 6px;
+        background-color: #e5e7eb;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 4px;
+      }
+      
+      .texture-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+      
+      .texture-status-icon {
+        width: 16px;
+        height: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .texture-cancel-btn {
+        margin-left: auto;
+        padding: 4px 8px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
       }
     </style>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
@@ -293,6 +341,16 @@
                 Generate
               </button>
             </div>
+            <div id="textureStatus" class="texture-status hidden">
+              <div class="texture-status-icon">
+                <div class="loading-spinner-mini" style="width: 14px; height: 14px; border-width: 2px;"></div>
+              </div>
+              <span id="textureStatusText">Generating texture...</span>
+              <button id="textureCancelBtn" class="texture-cancel-btn hidden">Cancel</button>
+            </div>
+            <div id="textureProgress" class="texture-progress hidden">
+              <div id="textureProgressBar" class="texture-progress-bar"></div>
+            </div>
           </div>
 
           <div class="md:col-span-2">
@@ -373,6 +431,7 @@
           userTexture: null,
           isGenerating: false,
           currentFont: null,
+          textureGenerationAbortController: null,
         };
 
         const elements = {
@@ -394,10 +453,49 @@
           formatSelect: document.getElementById("formatSelect"),
           toast: document.getElementById("toast"),
           renderError: document.getElementById("renderError"),
+          textureStatus: document.getElementById("textureStatus"),
+          textureStatusText: document.getElementById("textureStatusText"),
+          textureProgress: document.getElementById("textureProgress"),
+          textureProgressBar: document.getElementById("textureProgressBar"),
+          textureCancelBtn: document.getElementById("textureCancelBtn"),
         };
 
         function showToast(msg, type = "info", duration = 3000) {
+          const toast = elements.toast;
+          toast.textContent = msg;
+          toast.className = `toast ${type}`;
+          toast.style.opacity = "1";
+          
+          setTimeout(() => {
+            toast.style.opacity = "0";
+          }, duration);
+          
           console.log(`[${type}] ${msg}`);
+        }
+
+        function updateTextureProgress(percent) {
+          elements.textureProgressBar.style.width = `${percent}%`;
+          
+          if (percent < 100) {
+            elements.textureStatusText.textContent = `Generating texture... ${Math.round(percent)}%`;
+          } else {
+            elements.textureStatusText.textContent = "Finalizing texture...";
+          }
+        }
+
+        function showTextureStatus(show) {
+          if (show) {
+            elements.textureStatus.classList.remove("hidden");
+            elements.textureProgress.classList.remove("hidden");
+            elements.generateTextureBtn.disabled = true;
+            elements.textureCancelBtn.classList.remove("hidden");
+          } else {
+            elements.textureStatus.classList.add("hidden");
+            elements.textureProgress.classList.add("hidden");
+            elements.generateTextureBtn.disabled = false;
+            elements.textureCancelBtn.classList.add("hidden");
+            elements.textureProgressBar.style.width = "0%";
+          }
         }
 
         function initThree() {
@@ -470,18 +568,53 @@
         }
 
         async function generateTexture(prompt) {
+          // Create a new AbortController for this request
+          state.textureGenerationAbortController = new AbortController();
+          
           try {
+            // Show initial status
+            showTextureStatus(true);
+            updateTextureProgress(10);
+            
+            // Simulate progress for demonstration
+            const progressInterval = setInterval(() => {
+              const currentProgress = parseInt(elements.textureProgressBar.style.width || "10");
+              if (currentProgress < 90) {
+                updateTextureProgress(currentProgress + 10);
+              }
+            }, 800);
+            
             const res = await fetch(
               `https://text-to-image.jessejesse.workers.dev/?prompt=${encodeURIComponent(prompt)}`,
+              {
+                signal: state.textureGenerationAbortController.signal
+              }
             );
+            
+            clearInterval(progressInterval);
+            updateTextureProgress(95);
+            
             if (!res.ok) throw new Error("Failed to generate texture");
+            
             const blob = await res.blob();
+            updateTextureProgress(100);
+            
+            // Small delay to show 100% completion
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
             return URL.createObjectURL(blob);
           } catch (e) {
+            if (e.name === 'AbortError') {
+              showToast("Texture generation cancelled", "warning");
+              throw e;
+            }
+            
             showToast(
               "Texture API unavailable, using fallback texture",
               "info",
             );
+            
+            // Create a fallback texture
             const canvas = document.createElement("canvas");
             canvas.width = 512;
             canvas.height = 512;
@@ -511,20 +644,31 @@
             ctx.fillText(prompt.substring(0, 20), 20, 50);
 
             return canvas.toDataURL("image/png");
+          } finally {
+            showTextureStatus(false);
           }
         }
 
         async function applyTexture(mesh, prompt) {
-          const url = await generateTexture(prompt);
-          const tex = state.textureLoader.load(url, () => {
-            if (mesh.material) {
-              if (mesh.material.map) mesh.material.map.dispose();
+          try {
+            const url = await generateTexture(prompt);
+            const tex = state.textureLoader.load(url, () => {
+              if (mesh.material) {
+                if (mesh.material.map) mesh.material.map.dispose();
 
-              mesh.material.map = tex;
-              mesh.material.needsUpdate = true;
-              showToast("Texture Applied", "success");
+                mesh.material.map = tex;
+                mesh.material.needsUpdate = true;
+                showToast("Texture Applied Successfully", "success");
+              }
+            });
+            
+            return true;
+          } catch (error) {
+            if (error.name !== 'AbortError') {
+              showToast("Failed to generate texture", "error");
             }
-          });
+            return false;
+          }
         }
 
         async function generateText() {
@@ -578,7 +722,9 @@
               state.scene.add(state.textMesh);
               fitCamera(state.textMesh);
 
-              if (texPrompt) await applyTexture(state.textMesh, texPrompt);
+              if (texPrompt) {
+                await applyTexture(state.textMesh, texPrompt);
+              }
 
               elements.loading.classList.add("hidden");
               elements.downloadBtn.disabled = false;
@@ -693,7 +839,17 @@
           await applyTexture(state.textMesh, prompt);
         });
 
+        elements.textureCancelBtn.addEventListener("click", () => {
+          if (state.textureGenerationAbortController) {
+            state.textureGenerationAbortController.abort();
+            showTextureStatus(false);
+          }
+        });
+
         elements.downloadBtn.addEventListener("click", downloadModel);
+
+        // Set current year in footer
+        document.getElementById("year").textContent = new Date().getFullYear();
 
         setTimeout(() => {
           generateText();
@@ -702,6 +858,7 @@
     </script>
   </body>
 </html>
+
 
 
 
