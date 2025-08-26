@@ -25,4 +25,5 @@ An interactive web application for creating 3D text models and exporting them as
 
 ---
 <img width="1512" height="848" alt="Screenshot 2025-08-25 at 11 51 55" src="https://github.com/user-attachments/assets/47698563-0c13-4190-9846-741d90456258" />
+<img width="1452" height="429" alt="Screenshot 2025-08-25 at 22 25 21" src="https://github.com/user-attachments/assets/dbcf968b-c2e8-4418-906d-6e29b8735d30" />
 
