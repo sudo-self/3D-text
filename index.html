@@ -611,16 +611,11 @@
           }
         });
 
-       const generateBtn = document.getElementById("generateBtn");
+        const generateBtn = document.getElementById("generateBtn");
 
-generateBtn.addEventListener("click", () => {
-  const inputEl = document.getElementById("textInput");
-  const text = inputEl.value.trim() || "add some text";
-
-  console.log("Using text:", text);
-  // your generate code here...
-});
-
+        generateBtn.addEventListener("click", () => {
+          const inputEl = document.getElementById("textInput");
+          const text = inputEl.value.trim() || "add some text";
 
           const color = document.getElementById("textColor").value;
           const font = document.getElementById("fontStyle").value;
@@ -701,11 +696,6 @@ generateBtn.addEventListener("click", () => {
     </script>
   </body>
 </html>
-
-
-
-
-
 
 
 
