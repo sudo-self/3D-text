@@ -96,7 +96,7 @@
             <label
               for="textInput"
               class="block mb-2 font-semibold text-gray-700"
-              >Enter Text</label
+              >Enter Text to make 3D</label
             >
             <input
               type="text"
@@ -111,7 +111,7 @@
             <label
               for="textColor"
               class="block mb-2 font-semibold text-gray-700"
-              >Text Color</label
+              >Choose a Color</label
             >
             <input
               type="color"
@@ -125,7 +125,7 @@
             <label
               for="textureInput"
               class="block mb-2 font-semibold text-gray-700"
-              >Texture Upload (optional)</label
+              >Add Texture from image Upload (optional)</label
             >
             <input
               type="file"
@@ -143,7 +143,7 @@
             <label
               for="texturePrompt"
               class="block mb-2 font-semibold text-gray-700"
-              >Texture Prompt (optional)</label
+              >Add Texture from a text Prompt (optional)</label
             >
             <input
               type="text"
@@ -158,7 +158,7 @@
               <span
                 class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent"
               >
-                Generate Texture
+                Create Texture
               </span>
             </button>
           </div>
@@ -167,7 +167,7 @@
             <label
               for="fontStyle"
               class="block mb-2 font-semibold text-gray-700"
-              >Font Style</label
+              >Select a Font Style</label
             >
             <select
               id="fontStyle"
@@ -184,7 +184,7 @@
             <label
               for="metalness"
               class="block mb-2 font-semibold text-gray-700"
-              >Metalness <span id="metalValue">0.50</span></label
+              >Metallic <span id="metalValue">0.50</span></label
             >
             <input
               type="range"
@@ -201,7 +201,7 @@
             <label
               for="roughness"
               class="block mb-2 font-semibold text-gray-700"
-              >Roughness <span id="roughValue">0.50</span></label
+              >Roughness<span id="roughValue">0.50</span></label
             >
             <input
               type="range"
@@ -216,7 +216,7 @@
 
           <div>
             <label for="depth" class="block mb-2 font-semibold text-gray-700"
-              >Depth <span id="depthValue">0.50</span></label
+              >Letter Depth<span id="depthValue">0.50</span></label
             >
             <input
               type="range"
@@ -231,12 +231,12 @@
 
           <button
             id="generateBtn"
-            class="relative inline-flex items-center justify-center p-0.5 mt-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-cyan-500 to-blue-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-cyan-200 w-full"
+            class="relative inline-flex items-center justify-center p-0.5 mt-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-cyan-500 to-indigo-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-cyan-200"
           >
             <span
               class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-transparent"
             >
-              Create 3D Text
+              Make Text 3D
             </span>
           </button>
         </div>
@@ -256,8 +256,8 @@
           id="formatSelect"
           class="p-2 rounded-lg border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400"
         >
-          <option value="glb">3D Model (GLB)</option>
-          <option value="stl">3D Printer (STL)</option>
+          <option value="glb">GL Transmission (GLB)</option>
+          <option value="stl">STereoLithography (STL)</option>
         </select>
 
         <button
@@ -310,7 +310,7 @@
 
           renderer = new THREE.WebGLRenderer({ 
             antialias: true,
-            preserveDrawingBuffer: true // Allows for screenshot functionality
+            preserveDrawingBuffer: true 
           });
           renderer.setSize(width, height);
           renderer.setPixelRatio(window.devicePixelRatio);
@@ -326,9 +326,9 @@
           dir.position.set(5, 10, 5);
           scene.add(dir);
 
-          // Add a grid helper for better spatial reference
+     
           const gridHelper = new THREE.GridHelper(10, 10);
-          gridHelper.visible = false; // Hidden by default
+          gridHelper.visible = false; 
           scene.add(gridHelper);
 
           window.addEventListener("resize", onWindowResize);
@@ -431,7 +431,7 @@
               scene.add(textMesh);
               fitCameraToObject(textMesh);
 
-              // Update slider displays
+         
               document.getElementById("metalValue").textContent =
                 metalness.toFixed(2);
               document.getElementById("roughValue").textContent =
@@ -451,7 +451,7 @@
           );
         }
 
-        // Set up event listeners
+   
         const metalSlider = document.getElementById("metalness");
         const roughSlider = document.getElementById("roughness");
         const depthSlider = document.getElementById("depth");
@@ -560,7 +560,7 @@
               textureUrl = URL.createObjectURL(blob);
             } catch (apiError) {
               console.warn("API texture generation failed, using fallback:", apiError);
-              // Create a fallback gradient texture
+         
               const canvas = document.createElement('canvas');
               canvas.width = 256;
               canvas.height = 256;
@@ -657,13 +657,13 @@
                 link.click();
                 document.body.removeChild(link);
                 
-                // Clean up the URL object after download
+             
                 setTimeout(() => URL.revokeObjectURL(link.href), 100);
               },
               { binary: true },
             );
           } else if (format === "stl") {
-            // Check if STLExporter is available
+         
             if (typeof THREE.STLExporter === 'undefined') {
               alert("STL export is not supported in this version. Please try GLB format.");
               return;
@@ -680,15 +680,15 @@
             link.click();
             document.body.removeChild(link);
             
-            // Clean up the URL object after download
+          
             setTimeout(() => URL.revokeObjectURL(link.href), 100);
           }
         });
 
-        // Initialize the scene
+    
         init();
         
-        // Generate initial text
+   
         setTimeout(() => {
           document.getElementById("generateBtn").click();
         }, 500);
