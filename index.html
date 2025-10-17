@@ -228,151 +228,146 @@
          <p class="text-md text-pink-600">¯\_(ツ)_/¯</p>
       </header>
 
-      <section class="card mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="md:col-span-2">
-            <label
-              for="textInput"
-              class="block mb-2 font-semibold text-gray-700"
-              >Enter Text</label
-            >
-            <input
-              type="text"
-              id="textInput"
-              class="input-field w-full"
-              placeholder="Add your text here"
-            />
-          </div>
+<section class="card mb-8">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          <div>
-            <label
-              for="textColor"
-              class="block mb-2 font-semibold text-gray-700"
-              >Text Color</label
-            >
-            <input
-              type="color"
-              id="textColor"
-              value="#4F46E5"
-              class="w-full h-10 rounded-lg border-0 cursor-pointer"
-            />
-          </div>
+    <!-- Text Input -->
+    <div class="md:col-span-2">
+      <label for="textInput" class="block mb-2 font-semibold text-gray-700">
+        Enter Text
+      </label>
+      <input
+        type="text"
+        id="textInput"
+        class="input-field w-full"
+        placeholder="Add your text here"
+      />
+    </div>
 
-          <div>
-            <label
-              for="fontStyle"
-              class="block mb-2 font-semibold text-gray-700"
-              >Font Style</label
-            >
-            <select id="fontStyle" class="input-field w-full">
-              <option value="helvetiker">Helvetiker</option>
-              <option value="optimer">Optimer</option>
-              <option value="gentilis">DA FONT</option>
-              <option value="droid_sans">Droid Sans</option>
-              <option value="droid_serif">Droid Serif</option>
-            </select>
-          </div>
+    <!-- Text Color -->
+    <div>
+      <label for="textColor" class="block mb-2 font-semibold text-gray-700">
+        Text Color
+      </label>
+      <input
+        type="color"
+        id="textColor"
+        value="#4F46E5"
+        class="w-full h-10 rounded-lg border-0 cursor-pointer"
+      />
+    </div>
 
-          <div>
-            <label for="depth" class="block mb-2 font-semibold text-gray-700"
-              >Letter Depth: <span id="depthValue">0.50</span></label
-            >
-            <input
-              type="range"
-              id="depth"
-              min="0.1"
-              max="2"
-              step="0.1"
-              value="0.5"
-              class="w-full"
-            />
-          </div>
+    <!-- Font Style -->
+    <div>
+      <label for="fontStyle" class="block mb-2 font-semibold text-gray-700">
+        Font Style
+      </label>
+      <select id="fontStyle" class="input-field w-full">
+        <option value="helvetiker">Helvetiker</option>
+        <option value="optimer">Optimer</option>
+        <option value="gentilis">DA FONT</option>
+        <option value="droid_sans">Droid Sans</option>
+        <option value="droid_serif">Droid Serif</option>
+      </select>
+    </div>
 
-          <div>
-            <label
-              for="metalness"
-              class="block mb-2 font-semibold text-gray-700"
-              >Metallic: <span id="metalValue">0.50</span></label
-            >
-            <input
-              type="range"
-              id="metalness"
-              min="0"
-              max="1"
-              step="0.01"
-              value="0.5"
-              class="w-full"
-            />
-          </div>
+    <!-- Depth -->
+    <div>
+      <label for="depth" class="block mb-2 font-semibold text-gray-700">
+        Letter Depth: <span id="depthValue">0.50</span>
+      </label>
+      <input
+        type="range"
+        id="depth"
+        min="0.1"
+        max="2"
+        step="0.1"
+        value="0.5"
+        class="w-full"
+      />
+    </div>
 
-          <div>
-            <label
-              for="roughness"
-              class="block mb-2 font-semibold text-gray-700"
-              >Roughness: <span id="roughValue">0.50</span></label
-            >
-            <input
-              type="range"
-              id="roughness"
-              min="0"
-              max="1"
-              step="0.01"
-              value="0.5"
-              class="w-full"
-            />
-          </div>
-          
-<div class="md:col-span-2">
-  <label
-    for="texturePrompt"
-    class="block font-semibold text-gray-700"
-  >
-    Texture AI ㋡
-  </label>
-  <span class="text-xs text-gray-400 block mt-1 mb-2">
-    For best results, start with a light font color
-  </span>
+    <!-- Metalness -->
+    <div>
+      <label for="metalness" class="block mb-2 font-semibold text-gray-700">
+        Metallic: <span id="metalValue">0.50</span>
+      </label>
+      <input
+        type="range"
+        id="metalness"
+        min="0"
+        max="1"
+        step="0.01"
+        value="0.5"
+        class="w-full"
+      />
+    </div>
 
-  <div class="flex gap-2">
-    <input
-      type="text"
-      id="texturePrompt"
-      placeholder="bubbles, marble, brick, etc..."
-      class="input-field flex-grow w-full"
-    />
-    <button
-      id="generateTextureBtn"
-      class="btn-primary bg-gradient-to-r from-indigo-500 via-pink-500 to-yellow-500"
-    >
-      🪄 Create
-    </button>
+    <!-- Roughness -->
+    <div>
+      <label for="roughness" class="block mb-2 font-semibold text-gray-700">
+        Roughness: <span id="roughValue">0.50</span>
+      </label>
+      <input
+        type="range"
+        id="roughness"
+        min="0"
+        max="1"
+        step="0.01"
+        value="0.5"
+        class="w-full"
+      />
+    </div>
+
+    <!-- Texture AI Section -->
+    <div class="md:col-span-2">
+      <label for="texturePrompt" class="block font-semibold text-gray-700">
+        Texture AI ㋡
+      </label>
+      <span class="text-xs text-gray-400 block mt-1 mb-2">
+        For best results, start with a light font color
+      </span>
+      <div class="flex gap-2">
+        <input
+          type="text"
+          id="texturePrompt"
+          placeholder="bubbles, marble, brick, etc..."
+          class="input-field flex-grow w-full"
+        />
+        <button
+          id="generateTextureBtn"
+          class="btn-primary bg-gradient-to-r from-indigo-500 via-pink-500 to-yellow-500"
+        >
+          🪄 Create Texture
+        </button>
+      </div>
+    </div>
+
+    <!-- Texture Status / Progress -->
+    <div id="textureStatus" class="texture-status hidden md:col-span-2">
+      <div class="texture-status-icon">
+        <div class="loading-spinner-mini" style="width: 14px; height: 14px; border-width: 2px;"></div>
+      </div>
+      <span id="textureStatusText">creating texture...</span>
+      <button id="textureCancelBtn" class="texture-cancel-btn hidden">Cancel</button>
+    </div>
+    <div id="textureProgress" class="texture-progress hidden md:col-span-2">
+      <div id="textureProgressBar" class="texture-progress-bar"></div>
+    </div>
+
+    <!-- 3D Text Generation Button -->
+    <div class="md:col-span-2">
+      <button
+        id="generateBtn"
+        class="btn-primary w-full py-3 text-lg bg-gradient-to-r from-green-400 via-blue-500 to-purple-600"
+      >
+        Generate 3D Text
+      </button>
+    </div>
+
   </div>
-</div>
+</section>
 
-
-
-            <div id="textureStatus" class="texture-status hidden">
-              <div class="texture-status-icon">
-                <div class="loading-spinner-mini" style="width: 14px; height: 14px; border-width: 2px;"></div>
-              </div>
-              <span id="textureStatusText">creating texture...</span>
-              <button id="textureCancelBtn" class="texture-cancel-btn hidden">Cancel</button>
-            </div>
-            <div id="textureProgress" class="texture-progress hidden">
-              <div id="textureProgressBar" class="texture-progress-bar"></div>
-            </div>
-          </div>
-
-          <div class="md:col-span-2">
-            <button
-              id="generateBtn"
-              class="btn-primary w-full py-3 text-lg bg-gradient-to-r from-green-400 via-blue-500 to-purple-600"
-            >
-              Generate 3D Text
-            </button>
-          </div>
-        </div>
-      </section>
 
       <div id="loading" class="text-center mb-6 hidden">
         <div class="loading-spinner mb-2"></div>
